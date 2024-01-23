@@ -1,0 +1,27 @@
+---
+- name : post conf debian cloud tofu
+  hosts: debian12
+  remote_user: debian
+  become: true
+
+  tasks:
+  - name: "tofu : setup root key"
+    ansible.builtin.copy:
+      remote_src: true
+      src: /home/debian/.ssh/authorized_keys
+      dest: /root/.ssh/authorized_keys
+      owner: root
+      group: root
+      mode: '0600'
+
+  - name: "tofu : allow root sshkey"
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '(.*)PermitRootLogin(.*)$'
+      line: 'PermitRootLogin without-password'
+      owner: root
+
+  - name: "tofu : reload ssh"
+    service:
+      name: ssh
+      state: restarted

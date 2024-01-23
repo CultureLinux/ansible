@@ -1,0 +1,64 @@
+- name: "Debian12 : install snap"
+  ansible.builtin.apt:
+    pkg:
+      - snapd
+      - sudo
+
+- name: "Debian12 : mako to sudo "
+  ansible.builtin.user:
+    name: mako
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+
+- name: "Debian12 : mako to sudo no password"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%mako'
+    line: '%mako ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: "Debian12 : Restart snap and enable it"
+  systemd:
+      name: snapd
+      state: restarted
+      enabled: True
+  changed_when: False
+
+- name: "Debian12: install snap core"
+  command: snap install core
+
+
+- name: "Debian12: install microk8s"
+  command: su - mako -c 'sudo snap install microk8s --classic'
+
+#- name: "Debian12 : test firewall 16443"
+#  lineinfile:
+#    path: /etc/nftables.conf
+#    line: "tcp dport 16443 ct state established,new counter packets 0 bytes 0 accept"
+#    state: present
+#  check_mode: yes
+#  register: microk8s_nftable_detection
+#  
+#- name: "Nginx : apply "
+#  ansible.builtin.command: nft add rule filter input tcp dport 16443 ct state new,established counter accept
+#  notify:
+#    - "Save nftable"
+#  when: microk8s_nftable_detection
+
+
+- name: "Debian12: allow api server"
+  command: "ufw allow 16443"
+  notify:
+  - reload ufw
+
+- name: "Debian12: allow in cni0"
+  command: "ufw allow in on cni0"
+  notify:
+  - reload ufw
+
+- name: "Debian12: allow ount cni0"
+  command: "ufw allow out on cni0"
+  notify:
+  - reload ufw

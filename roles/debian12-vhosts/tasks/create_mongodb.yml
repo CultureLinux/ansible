@@ -1,0 +1,12 @@
+- name: "upload dbfilme {{ cli_user }}"
+  template: 
+    src: mongo-user.j2.js
+    dest: /root/mongo-{{ cli_user }}.js
+    owner: root 
+    group: root 
+    mode: 0600
+  when: (cli_mongo is defined) 
+
+- name: "load dbfilme admin"
+  command:  mongosh --authenticationDatabase admin -f /root/mongo-{{ cli_user }}.js
+  when: (cli_mongo is defined) 

@@ -1,0 +1,59 @@
+- name:  "Debian12 : mongodb requierements"
+  ansible.builtin.apt:
+    pkg:
+    - curl
+    - gpg
+    - build-essential
+    - libjpeg-dev
+    - libpng-dev
+    - libtiff-dev
+
+- name: "Debian12 : get mongodb key, save in /usr/share/keyrings for newer apt deb syntax"
+  get_url:
+    url: https://pgp.mongodb.com/server-7.0.asc
+    dest: /usr/share/keyrings/mongo-server-7.0.asc
+    mode: ugo+rw
+
+# add custom apt repo with 'signed-by' referring to gpg key
+- name: "Debian12 : add mongodb apt repository"
+  apt_repository:
+    repo: deb [arch=amd64, signed-by=/usr/share/keyrings/mongo-server-7.0.asc] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse
+    state: present
+    filename: mongodb-org-7.0.list
+    update_cache: yes
+    mode: 0644
+    validate_certs: false
+
+- name: "Debian12 : run the equivalent of apt-get update"
+  apt: update_cache=yes
+
+- name:  "Debian12 : install mongodb-org"
+  ansible.builtin.apt:
+    pkg:
+    - mongodb-org
+
+- name: "Debian12 : start mongodb and enable it"
+  systemd:
+      name: mongod
+      state: restarted
+      enabled: True
+  changed_when: False
+
+- name: "Debian12 : set vm.max_map_count to 262144 in sysctl"
+  sysctl: 
+    name: vm.max_map_count
+    value: 262144
+    state: present
+    sysctl_set: yes
+    reload: yes
+
+- name: "Debian12 : hugepage disable in grub"
+  lineinfile: 
+    dest: /etc/default/grub
+    regexp: '^.*GRUB_CMDLINE_LINUX.*$' 
+    line: 'GRUB_CMDLINE_LINUX="transparent_hugepage=never"'
+    state: present
+
+- name : "Debian12 update grub "
+  command: update-grub
+  #notify: reboot

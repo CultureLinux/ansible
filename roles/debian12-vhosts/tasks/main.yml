@@ -1,0 +1,10 @@
+#- import_tasks: apply_debug.yml
+#- import_tasks: apply_test_os.yml
+- import_tasks: create_user.yml
+- import_tasks: create_mongodb.yml
+- import_tasks: create_mariadb.yml
+- import_tasks: create_nginx.yml
+- import_tasks: create_php.yml
+- name: "End of creation vhost {{ cli_hosts }}"
+  debug:
+    msg: Add pubkey to gitlab {{ user_ssh_pub_key.stdout  | string | trim}}

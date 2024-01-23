@@ -1,0 +1,8 @@
+- name: "Debian12 : install java17"
+  ansible.builtin.apt:
+    pkg:
+      - openjdk-17-jdk
+
+- name: "Debian12 : check version"
+  command: java --version
+

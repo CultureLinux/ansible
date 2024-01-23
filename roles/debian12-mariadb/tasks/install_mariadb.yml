@@ -1,0 +1,37 @@
+- name: "MariaDB : Detect file auto conn"
+  ansible.builtin.stat:
+    path: /root/.my.cnf
+  register: mariadb_detected
+
+
+- name: "MariaDB : get repo tool"
+  ansible.builtin.get_url:
+    url: https://r.mariadb.com/downloads/mariadb_repo_setup
+    dest: /usr/local/sbin/mariadb_repo_setup
+    owner:  root 
+    group: root 
+    mode: 0700
+
+- name: "MariaDB : switch tools"
+  shell: "mariadb_repo_setup --mariadb-server-version=mariadb-{{mariadb_version}}"
+
+- name: "MariaDB : Install server / client "
+  ansible.builtin.apt:
+    name: 
+    - mariadb-server 
+    - mariadb-client 
+    - mariadb-backup
+
+- name: "MariaDB : switch tools"
+  lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: '(.*)bind-address(.*)$'
+    line: 'bind-address            = 0.0.0.0'
+    owner: root
+  register: mariadb_bind_change
+
+- name: "MariaDB : restart service"
+  ansible.builtin.systemd_service:
+    state: restarted
+    name: mariadb
+  when: mariadb_bind_change.changed

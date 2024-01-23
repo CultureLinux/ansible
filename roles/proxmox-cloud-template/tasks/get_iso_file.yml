@@ -1,0 +1,6 @@
+- name: "Get daily generic cloud for {{item.name}}"
+  get_url:
+    url: "{{item.url}}{{item.file}}"
+    dest: "/tmp/{{item.file}}"
+    mode: 0640
+

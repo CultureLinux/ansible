@@ -1,0 +1,20 @@
+- name: "Debian12 : php8.2"
+  ansible.builtin.apt:
+    pkg:
+    - php8.2-fpm 
+    - php8.2-cli 
+    - php8.2-common
+    - php8.2-oauth
+    - php8.2-mysql
+    - php8.2-mongodb
+    - php8.2-mbstring
+    - php8.2-imagick
+    - php8.2-gd
+    - composer
+
+- name: "Debian12 : php8.2"
+  systemd:
+      name: php8.2-fpm
+      state: restarted
+      enabled: True
+  changed_when: False

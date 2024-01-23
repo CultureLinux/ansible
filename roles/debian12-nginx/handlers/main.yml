@@ -1,0 +1,7 @@
+---
+- name: "Save nftable"
+  shell: "nft list ruleset > /etc/nftables.conf"
+  listen: "Save nftable"
+- name: reload ufw
+  ufw:
+    state: reloaded

@@ -1,0 +1,36 @@
+---
+- name:  "Debian12 : mongodb requierements"
+  ansible.builtin.apt:
+    pkg:
+    - python3-pymongo
+    
+
+- name: "upload dbfilme admin"
+  template: 
+    src: mongo-admin.j2.js
+    dest: /root/mongo-admin.js
+    owner: root 
+    group: root 
+    mode: 0600
+
+- name: "load dbfilme admin"
+  command: mongosh admin -f /root/mongo-admin.js
+
+- name: "Debian12 : stop mongodb and enable it"
+  systemd:
+      name: mongod
+      state: stopped
+
+- name: "Debian12 : Add snippets letsencrypt"
+  copy:
+    src: files/mongo/mongod.conf
+    dest: /etc/mongod.conf
+    mode: 0644
+    owner: root
+
+
+- name: "Debian12 : start mongodb and enable it"
+  systemd:
+      name: mongod
+      state: started
+

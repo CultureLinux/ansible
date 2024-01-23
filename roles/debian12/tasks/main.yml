@@ -1,0 +1,5 @@
+- include_tasks: update.yml
+- include_tasks: clean.yml
+- include_tasks: ufw.yml
+- include_tasks: hardening.yml
+- include_tasks: msmtp.yml

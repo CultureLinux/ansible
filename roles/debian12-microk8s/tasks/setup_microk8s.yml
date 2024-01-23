@@ -1,0 +1,14 @@
+- name: "Debian12: microk8s dashboard"
+  command: "microk8s enable dashboard"
+
+- name: "Debian12: microk8s ingress"
+  command: "microk8s enable ingress"
+
+- name: "Debian12: microk8s metrics-server"
+  command: "microk8s enable metrics-server"
+
+
+
+
+
+

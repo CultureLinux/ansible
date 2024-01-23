@@ -1,0 +1,138 @@
+
+<html>
+<head>
+
+    <title>Bonjour</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            top: 180px;
+            box-sizing: border-box;
+        }
+
+        body {
+            color: #ffffff;
+            font-family: "Gill Sans", "Gill Sans MT", "Myriad Pro", "DejaVu Sans Condensed", Helvetica, Arial, sans-serif;
+            background-color: #1a7ac4;
+        }
+
+        #errorpage h1 {
+            font-size: 90px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #errorpage h2 {
+            font-size: 40px;
+            font-weight: normal;
+            margin-bottom: 5px;
+            width: 120%;
+        }
+
+        #errorpage .oups {
+            width: 50%;
+            padding: 0 0 0 20%;
+            float: left;
+            position: relative;
+        }
+
+        div.logo {
+            margin-left: 20%;
+            position: relative;
+        }
+
+        #errorpage .oups a {
+            padding: 15px 30px;
+            background-color: #ffed29;
+            text-decoration: none;
+            color: #000000;
+            font-size: 16px;
+            border-radius: 4px;
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+            #errorpage .oups a:hover {
+                background-color: #FFCE1D;
+            }
+
+        #errorpage .prise {
+            width: 45%;
+            float: right;
+        }
+
+            #errorpage .prise img {
+                width: 100%;
+                max-width: 525px;
+                max-height: 850px;
+            }
+
+        @media screen and (max-width: 800px) {
+            #errorpage {
+                padding: 15px;
+            }
+
+            * {
+                top: auto;
+                text-align: center;
+            }
+
+            div.logo {
+                width: 100%;
+                margin: 0 auto;
+            }
+
+                div.logo img {
+                    max-width: 320px;
+                }
+
+            #errorpage .oups {
+                width: 100%;
+                float: inherit;
+                padding: 0;
+                margin-bottom: 10px;
+            }
+
+                #errorpage .oups p {
+                    font-size: 15px;
+                }
+
+            #errorpage .prise {
+                width: 100%;
+                float: inherit;
+            }
+
+            #errorpage h1 {
+                font-size: 40px;
+                margin-bottom: 0;
+            }
+
+            #errorpage h2 {
+                font-size: 18px;
+            }
+
+            #errorpage .prise img {
+                width: 50%;
+            }
+        }
+
+
+        /*#errorpage .oups a { font-family: $font-ptsans; font-weight:400; font-size:22px; background-color:$coul-validation; color:$blanc; border:1px solid $coul-validation; width:30%; margin:0 auto; padding:1.5%; transition:all .3s; -moz-border-radius:4px; -webkit-border-radius:4px; -khtml-border-radius:4px; border-radius:4px; outline:none; cursor:pointer; text-align:center; } */
+    </style>
+</head>
+<body>
+    <div id="errorpage">
+        <div class="oups">
+            <h1>Bonjour !</h1>
+            <h2>Erreur de destination !</h2>
+            <p>Un souci ?</p>
+        </div>
+        <div class="prise">
+            <img src="/hole.png" alt="Erreur 500">
+        </div>
+    </div>
+</body>
+</html>

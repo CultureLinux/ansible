@@ -1,0 +1,60 @@
+- name: "MariaDB : test .my.cnf"
+  stat:
+    path: /root/.my.cnf
+  register: mariadb_detected
+
+#- name: "debug"
+#  debug: 
+#    msg: System > {{ mariadb_detected.stat.exists }} < 
+
+- name: Remove anonymous users
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User=''
+  changed_when: False
+  tags:
+      - mariadb
+  when: not mariadb_detected.stat.exists
+
+- name: Remove test database and access to it
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - DROP DATABASE IF EXISTS test
+    - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
+  changed_when: False
+  tags:
+      - mariadb
+  when: not mariadb_detected.stat.exists
+
+- name: Set root Password
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - use mysql
+    - ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_root_password }}';
+  changed_when: False
+  when: not mariadb_detected.stat.exists
+
+# create root .my.cnf config file
+- name: Add .my.cnf
+  template: src=my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+  tags:
+      - mariadb
+  when: not mariadb_detected.stat.exists
+
+- name: Disallow root login remotely
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
+  changed_when: False
+  tags:
+      - mariadb
+  when: not mariadb_detected.stat.exists
+
+- name: Reload privilege tables
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - FLUSH PRIVILEGES
+  changed_when: False
+  tags:
+      - mariadb
+  when: not mariadb_detected.stat.exists

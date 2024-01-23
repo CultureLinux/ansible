@@ -1,0 +1,9 @@
+- name: Set {{ cli_user }} Password
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - CREATE DATABASE IF NOT EXISTS `{{ cli_user }}` ;
+    - use mysql ;
+    - GRANT ALL ON `{{ cli_user }}`.* TO `{{ cli_user }}`@'localhost' IDENTIFIED BY '{{ cli_user }}';
+    - FLUSH PRIVILEGES;
+  changed_when: False
+  when: (cli_type == "cakephp") 

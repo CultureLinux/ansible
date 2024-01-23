@@ -1,0 +1,24 @@
+- name: Install all standard tools
+  ansible.builtin.apt:
+    pkg:
+    - nmon
+    - net-tools
+    - git
+    - vim
+    - apt-file
+    - gnu-which
+
+- name: "Debian12 : Add alias in profiles"
+  copy:
+    src: alias.sh
+    dest: /etc/profile.d/alias.sh
+    mode: 0644
+    owner: root
+
+- name: "Debian12 : Add NMON export root"
+  lineinfile:
+      path: /root/.bashrc
+      regexp: '^export NMN'
+      line: 'export NMON=dtcmnu'
+  tags:
+      - alias-nmon

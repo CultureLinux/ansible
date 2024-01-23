@@ -1,0 +1,4 @@
+---
+- import_tasks: install_mariadb_tools.yml
+- import_tasks: install_mariadb.yml
+- import_tasks: install_mariadb_post.yml

@@ -1,0 +1,8 @@
+- include_tasks : build_facts.yml
+- name : autoloop
+  include_tasks : get_iso_file.yml
+  loop: "{{all_daily}}"
+
+- name : autoloop
+  include_tasks : load_iso_file.yml
+  loop: "{{all_daily}}"

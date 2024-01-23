@@ -1,0 +1,10 @@
+- name: "Load script for {{item.name}}"
+  template:
+    src: load_daily_cloud.j2.sh
+    dest: /tmp/load_daily_cloud.sh
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: "Import {{item.name}} in proxmox"
+  shell: /tmp/load_daily_cloud.sh

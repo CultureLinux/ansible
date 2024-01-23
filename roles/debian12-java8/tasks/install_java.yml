@@ -1,0 +1,19 @@
+- name: "Debian12 : install wtf repo"
+  get_url:
+    url: http://www.mirbsd.org/~tg/Debs/sources.txt/wtf-bookworm.sources
+    dest: /etc/apt/sources.list.d/wtf-bookworm.sources
+    mode: 0640
+
+- name: "Debian12 : apt update with cache"
+  apt:
+    update_cache: yes
+
+
+- name: "Debian12 : install java8"
+  ansible.builtin.apt:
+    pkg:
+      - openjdk-8-jdk
+
+- name: "Debian12 : check version"
+  command: java -version
+

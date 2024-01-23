@@ -1,0 +1,5 @@
+
+- name: "Rocky8 : PyMySQL Install"
+  ansible.builtin.apt:
+    name: 
+    - python3-pymysql

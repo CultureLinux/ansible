@@ -1,0 +1,67 @@
+- name: "Nginx : Install basics"
+  ansible.builtin.apt:
+    pkg:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+- name: "Nginx : Tweak nginx.conf"
+  copy:
+    src: nginx/nginx.conf
+    dest: /etc/nginx/nginx.conf
+    mode: 0644
+    owner: root
+- name: "Nginx : create snippets"
+  file:
+    path: /etc/nginx/snippets
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+- name: "Nginx : Add snippets proxy"
+  copy:
+    src: nginx_snippets/proxy.conf
+    dest: /etc/nginx/snippets/proxy.conf
+    mode: 0644
+    owner: root
+- name: "Nginx : Add snippets error"
+  copy:
+    src: nginx_snippets/errors.conf
+    dest: /etc/nginx/snippets/errors.conf
+    mode: 0644
+    owner: root
+- name: "Nginx : Add snippets ssl"
+  copy:
+    src: nginx_snippets/ssl.conf
+    dest: /etc/nginx/snippets/ssl.conf
+    mode: 0644
+    owner: root
+- name: "Nginx : Add snippets letsencrypt"
+  copy:
+    src: nginx_snippets/letsencrypt.conf
+    dest: /etc/nginx/snippets/letsencrypt.conf
+    mode: 0644
+    owner: root
+
+- name: "Nginx: allow nginx 80 ufw"
+  command: "ufw allow 80"
+  notify:
+  - reload ufw
+
+- name: "Nginx: allow nginx 443 ufw"
+  command: "ufw allow 443"
+  notify:
+  - reload ufw  
+
+#- name: "Nginx : test firewall 803443"
+#  lineinfile:
+#    path: /etc/nftables.conf
+#    line: "tcp dport { 80, 443 } ct state established,new counter packets 0 bytes 0 accept"
+#    state: present
+#  check_mode: yes
+#  register: nginx_nftable_detection
+#
+#- name: "Nginx : apply "
+#  ansible.builtin.command: nft add rule filter input tcp dport {80, 443} ct state new,established counter accept
+#  notify:
+#    - "Save nftable"
+#  when: nginx_nftable_detection

@@ -1,0 +1,46 @@
+- name:  "Debian12 : hardening package"
+  ansible.builtin.apt:
+    pkg:
+    - rkhunter
+
+- name: "Debian12 : deny ssh root password "
+  replace: 
+    dest=/etc/ssh/sshd_config
+    regexp='^.*PermitRootLogin.*$' 
+    replace='PermitRootLogin prohibit-password'
+
+- name: "Debian12 : allow ssh root key "
+  replace: 
+    dest=/etc/rkhunter.conf
+    regexp='^.*ALLOW_SSH_ROOT_USER.*$' 
+    replace='ALLOW_SSH_ROOT_USER=prohibit-password'
+
+
+- name: "Debian12 : rkhunter email dest "
+  replace: 
+    dest=/etc/default/rkhunter
+    regexp='^.*REPORT_EMAIL.*$' 
+    replace='REPORT_EMAIL="msaettel@burger.fr"'
+
+- name: "Debian12 : rkhunter email dailty "
+  replace: 
+    dest=/etc/default/rkhunter
+    regexp='^.*CRON_DAILY_RUN.*$' 
+    replace='CRON_DAILY_RUN="yes"'    
+
+- name: "Debian12 : rkhunter email dailty "
+  replace: 
+    dest=/etc/default/rkhunter
+    regexp='^.*APT_AUTOGEN.*$' 
+    replace='APT_AUTOGEN="true"'    
+
+
+- name: "Debian12 : umask global "
+  copy:
+    src: set-umask-for-all-users.sh
+    dest: /etc/profile.d/set-umask-for-all-users.sh
+    mode: 0644
+    owner: root
+
+
+

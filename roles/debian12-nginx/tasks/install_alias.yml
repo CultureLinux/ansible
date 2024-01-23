@@ -1,0 +1,8 @@
+    - name: "Nginx : Add alias in profiles"
+      copy:
+        src: alias/webstack.sh
+        dest: /etc/profile.d/webstack.sh
+        mode: 0644
+        owner: root
+      tags:
+         - alias

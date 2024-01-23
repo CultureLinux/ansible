@@ -1,0 +1,8 @@
+mysql_root_password: "xtr4passwD"
+smtp_account: "gmail"
+smtp_server: "smtp.gmail.com"
+smtp_port: "587"
+smtp_user: "sender@mailsssss.com"
+smtp_password: "XXXXXXXXX"
+
+mariadb_version: "10.11"

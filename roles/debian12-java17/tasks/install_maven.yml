@@ -1,0 +1,7 @@
+- name: "Debian12 : install java17"
+  ansible.builtin.apt:
+    pkg:
+      - maven
+
+- name: "Debian12 : check version"
+  command: mvn --version

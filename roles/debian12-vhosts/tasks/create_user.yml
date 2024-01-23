@@ -1,0 +1,29 @@
+- name: Add the user "{{ cli_user }}" with a bash shell
+  ansible.builtin.user:
+    name: "{{ cli_user }}"
+    shell: /bin/bash
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+
+- name: Change home permissions 
+  ansible.builtin.file:
+    path: "/home/{{ cli_user }}"
+    mode: '0750'
+
+- name: Change file ownership, group and permissions
+  ansible.builtin.file:
+    path: "/home/{{ cli_user }}/.ssh/authorized_keys"
+    state: touch
+    owner: "{{ cli_user }}"
+    group: "{{ cli_user }}"
+    mode: '0600'
+    modification_time: preserve
+    access_time: preserve    
+
+- name: Register sshkey from 
+  raw: cat /home/{{ cli_user }}/.ssh/id_rsa.pub
+  register: user_ssh_pub_key
+  changed_when: no
+  check_mode: no
+

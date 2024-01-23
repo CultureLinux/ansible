@@ -1,0 +1,13 @@
+- name: "Debian12 : deny ssh root password "
+  replace: 
+    dest=/etc/nginx/sites-enabled/default
+    regexp='^.*root /var/www/html.*$' 
+    replace='root /usr/share/nginx/html/ ;'
+
+- name: "Nginx : Restart nginx and enable it"
+  systemd:
+      name: nginx
+      state: restarted
+      enabled: True
+  changed_when: False
+

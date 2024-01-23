@@ -1,0 +1,48 @@
+    - name: " Alias : 404 page"
+      copy:
+        src: pages/404.html
+        dest: /usr/share/nginx/html/404.html
+        mode: 0644
+        owner: root
+      tags:
+         - nginx-pages
+    - name: " Alias : 404 pics"
+      copy:
+        src: pages/bg.jpg
+        dest: /usr/share/nginx/html/bg.jpg
+        mode: 0644
+        owner: root
+      tags:
+         - nginx-pages
+    - name: " Alias : 500 page"
+      copy:
+        src: pages/500.html
+        dest: /usr/share/nginx/html/50x.html
+        mode: 0644
+        owner: root
+      tags:
+         - nginx-pages
+    - name: " Alias : index pic"
+      copy:
+        src: pages/500.jpg
+        dest: /usr/share/nginx/html/500.jpg
+        mode: 0644
+        owner: root
+      tags:
+         - nginx-pages
+    - name: " Alias : index page"
+      copy:
+        src: pages/index.html
+        dest: /usr/share/nginx/html/index.html
+        mode: 0644
+        owner: root
+      tags:
+         - nginx-pages
+    - name: " Alias : index pic"
+      copy:
+        src: pages/hole.png
+        dest: /usr/share/nginx/html/hole.png
+        mode: 0644
+        owner: root
+      tags:
+         - nginx-pages

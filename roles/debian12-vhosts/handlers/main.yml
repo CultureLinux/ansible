@@ -1,0 +1,10 @@
+---
+- name: reload nginx
+  systemd:
+      name: nginx
+      state: restarted
+      enabled: True
+
+- name: reload ufw
+  ufw:
+    state: reloaded
