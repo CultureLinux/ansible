@@ -3,8 +3,14 @@
   hosts: debian12
   remote_user: debian
   become: true
+  gather_facts: no
 
   tasks:
+  - name: wait ssh connection
+    wait_for_connection:
+      delay: 5
+      timeout: 300
+
   - name: "tofu : setup root key"
     ansible.builtin.copy:
       remote_src: true

@@ -10,3 +10,13 @@
         file: "noble-server-cloudimg-amd64.img"
         vm: "ubuntu2404-daily"
         vmid: "1001"
+#      - name: rocky8
+#        url: "https://download.rockylinux.org/pub/rocky/8/images/x86_64/"
+#        file: "Rocky-8-GenericCloud-Base.latest.x86_64.qcow2"
+#        vm: "rocky8-daily"
+#        vmid: "1002"
+#      - name: rocky9
+#        url: "https://download.rockylinux.org/pub/rocky/9/images/x86_64/"
+#        file: "Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
+#        vm: "rocky9-daily"
+#        vmid: "1003"#

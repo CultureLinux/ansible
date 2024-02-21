@@ -1,7 +1,7 @@
-- name: Add {{ cli_fqdn }} php-fpm 
+- name: Add {{ cli_vhost }} php-fpm 
   template: 
     src: php-fpm.vhost.j2 
-    dest: /etc/php/8.2/fpm/pool.d/{{ cli_fqdn }}.conf
+    dest: /etc/php/8.2/fpm/pool.d/{{ cli_vhost }}.conf
     owner: root 
     group: root 
     mode: 0660

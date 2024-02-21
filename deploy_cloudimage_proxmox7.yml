@@ -1,6 +1,6 @@
 ---
 - name : Get all cloudimages
-  hosts: proxmox7
+  hosts: proxmox
   remote_user: root
   become: true
 

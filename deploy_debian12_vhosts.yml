@@ -1,0 +1,21 @@
+- name: Deploy a vhost
+  vars_prompt:
+    - name: cli_hosts
+      prompt: Target server ? 
+      private: false
+    - name: cli_user
+      prompt: OS User ? 
+      private: false
+    - name: cli_type
+      prompt: Type of webservice ? 
+      private: false
+    - name: cli_vhost
+      prompt: fqdn ? 
+      private: false      
+
+  hosts:
+    "{{ cli_hosts }}"
+  remote_user: root
+  gather_facts: true
+  roles:
+      - debian12-vhosts

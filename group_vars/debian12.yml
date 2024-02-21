@@ -1,4 +1,7 @@
 mysql_root_password: "MariaDBPassword"
+mongo_admin_password: "xtr4passwD"
+mongo_svc_backup_password: "xtr4passwDBKP"
+
 smtp_account: "gmail"
 smtp_server: "smtp.gmail.com"
 smtp_port: "587"

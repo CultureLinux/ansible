@@ -1,9 +1,8 @@
 ---
-- name : post conf debian cloud tofu
+- name : general setup
   hosts: debian12
   remote_user: root
   become: true
 
   roles:
       - debian12
-      - debian12-mariadb
