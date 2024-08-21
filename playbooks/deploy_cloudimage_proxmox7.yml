@@ -5,4 +5,4 @@
   become: true
 
   roles:
-      - proxmox-cloud-template
+      - proxmox/proxmox-cloud-template
