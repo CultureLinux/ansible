@@ -1,8 +1,0 @@
----
-- name : Get all cloudimages
-  hosts: proxmox
-  remote_user: root
-  become: true
-
-  roles:
-      - proxmox/proxmox-cloud-template
