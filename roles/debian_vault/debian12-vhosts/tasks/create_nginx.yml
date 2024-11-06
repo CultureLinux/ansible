@@ -1,0 +1,21 @@
+- name: Add {{ cli_vhost }} nginx 
+  template: 
+    src: nginx-{{ cli_type }}.vhost.j2 
+    dest: /etc/nginx/sites-available/{{ cli_vhost }}.conf 
+    owner: root 
+    group: root 
+    mode: 0660
+
+- name: Activate vhost
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ cli_vhost }}.conf 
+    dest: /etc/nginx/sites-enabled/{{ cli_vhost }}.conf 
+    owner: root 
+    group: root 
+    state: link
+
+- name: reload nginx
+  systemd:
+      name: nginx
+      state: restarted
+      enabled: True

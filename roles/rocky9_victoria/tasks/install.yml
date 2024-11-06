@@ -1,0 +1,41 @@
+---
+- name: get last version of victoria metrics
+  ansible.builtin.shell:
+    cmd: curl -sg "https://api.github.com/repos/VictoriaMetrics/VictoriaMetrics/tags" | jq -r '.[0].name'
+  register: victoria_version
+
+- name: show version
+  debug:
+     msg: "{{ victoria_version.stdout_lines[0] }}"
+
+- name: get binary
+  ansible.builtin.unarchive:
+    src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoria_version.stdout_lines[0] }}/victoria-metrics-linux-amd64-{{ victoria_version.stdout_lines[0] }}.tar.gz
+    dest: /usr/bin
+    mode: 755
+    owner: root
+    group: root
+    remote_src: yes
+
+- name: Copy victoriametrics conf files
+  copy:
+    src: '{{item}}'
+    dest: /etc/victoriametrics/single/
+    owner: victoriametrics
+    group: victoriametrics
+    mode: '0644'
+  loop:
+    - victoriametrics.conf
+    - scrape.yml
+
+- name: Copy victoriametrics service
+  copy:
+    src: vmsingle.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Force relaod systemd 
+  ansible.builtin.systemd_service:
+    daemon_reload: true

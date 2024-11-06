@@ -1,0 +1,8 @@
+---
+- name : general setup
+  hosts: debian12
+  remote_user: root
+  become: true
+
+  roles:
+      - debian12

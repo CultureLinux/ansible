@@ -1,0 +1,14 @@
+---
+- name : post conf debian cloud tofu
+  hosts: 
+    - debian12
+  remote_user: root
+  become: true
+
+  roles:
+    - debian12
+    - debian12-nginx
+    - debian12-mariadb
+    - debian12-mongodb
+    - debian12-php8.2
+    #- debian12-nodejs

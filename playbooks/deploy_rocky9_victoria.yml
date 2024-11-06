@@ -1,0 +1,8 @@
+---
+- name : rocky9 baseline 
+  hosts: rocky9
+  remote_user: root
+  become: true
+
+  roles:
+      - rocky9_victoria

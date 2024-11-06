@@ -1,14 +1,22 @@
 ---
 - name : post conf debian cloud tofu
-  hosts: debian12
-  remote_user: debian
+  hosts: rocky9
+  remote_user: rocky
   become: true
+  module_defaults:
+    ansible.builtin.setup:
+      gather_subset: min
 
   tasks:
+  - name: wait ssh connection
+    wait_for_connection:
+      delay: 5
+      timeout: 300
+
   - name: "tofu : setup root key"
     ansible.builtin.copy:
       remote_src: true
-      src: /home/debian/.ssh/authorized_keys
+      src: /home/rocky/.ssh/authorized_keys
       dest: /root/.ssh/authorized_keys
       owner: root
       group: root
@@ -23,5 +31,13 @@
 
   - name: "tofu : reload ssh"
     service:
-      name: ssh
+      name: sshd
       state: restarted
+  - name: "Tofu : disable cloud init"
+    copy:
+      content: ""
+      dest: /etc/cloud/cloud-init.disabled
+      force: false
+      group: root
+      owner: root
+      mode: 0750

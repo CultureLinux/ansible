@@ -1,0 +1,13 @@
+---
+- name: "Rocky9 : Add alias in profiles"
+  copy:
+    src: alias.sh
+    dest: /etc/profile.d/alias.sh
+    mode: 0644
+    owner: root
+
+- name: "Rocky9 : Add NMON export root"
+  lineinfile:
+      path: /root/.bashrc
+      regexp: '^export NMN'
+      line: 'export NMON=dtcmnu' 

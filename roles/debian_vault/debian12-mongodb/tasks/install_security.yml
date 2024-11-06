@@ -5,6 +5,12 @@
     - python3-pymongo
     
 
+- name: "Test pre conf "
+  stat:
+    path: /root/mongo-admin.js
+  register: mongodb_detected
+
+
 - name: "upload dbfilme admin"
   template: 
     src: mongo-admin.j2.js
@@ -12,14 +18,17 @@
     owner: root 
     group: root 
     mode: 0600
+  when: not mongodb_detected.stat.exists
 
 - name: "load dbfilme admin"
   command: mongosh admin -f /root/mongo-admin.js
+  when: not mongodb_detected.stat.exists
 
 - name: "Debian12 : stop mongodb and enable it"
   systemd:
       name: mongod
       state: stopped
+  when: not mongodb_detected.stat.exists
 
 - name: "Debian12 : Add snippets letsencrypt"
   copy:
@@ -27,10 +36,10 @@
     dest: /etc/mongod.conf
     mode: 0644
     owner: root
-
+  when: not mongodb_detected.stat.exists
 
 - name: "Debian12 : start mongodb and enable it"
   systemd:
       name: mongod
       state: started
-
+  when: not mongodb_detected.stat.exists
