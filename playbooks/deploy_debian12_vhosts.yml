@@ -16,6 +16,8 @@
   hosts:
     "{{ cli_hosts }}"
   remote_user: root
-  gather_facts: true
+  module_defaults:
+    ansible.builtin.setup:
+      gather_subset: min
   roles:
       - debian12-vhosts

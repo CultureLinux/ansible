@@ -3,7 +3,9 @@
   hosts: rocky9
   remote_user: rocky
   become: true
-  gather_facts: no
+  module_defaults:
+    ansible.builtin.setup:
+      gather_subset: min
 
   tasks:
   - name: wait ssh connection
@@ -29,7 +31,7 @@
 
   - name: "tofu : reload ssh"
     service:
-      name: ssh
+      name: sshd
       state: restarted
   - name: "Tofu : disable cloud init"
     copy:

@@ -1,0 +1,36 @@
+---
+- name: Create victoriametrics
+  ansible.builtin.group:
+    name: victoriametrics
+    state: present
+
+- name: Create user victoriametrics
+  ansible.builtin.user:
+    name: victoriametrics
+    groups: victoriametrics
+    shell: /bin/false
+    home: /var/lib/victoria-metrics-data
+    createhome: yes 
+    state: present
+
+- name: Change permissions on /var/lib/victoria-metrics-data
+  file:
+    path: /var/lib/victoria-metrics-data
+    owner: victoriametrics
+    group: victoriametrics
+    mode: "0770"
+
+- name: Create victoriametrics etc directory
+  ansible.builtin.file:
+    path: /etc/victoriametrics/single/
+    state: directory
+    owner: victoriametrics
+    group: victoriametrics
+    mode: '0755'
+
+- name: Install all standard tools
+  ansible.builtin.dnf:
+    pkg:
+    - jq
+    - tar
+    - unzip

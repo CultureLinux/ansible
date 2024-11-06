@@ -1,0 +1,19 @@
+---
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Install EPEL repo
+  ansible.builtin.dnf:
+    name:
+      - epel-release
+    state: latest
+
+- name: Install all standard tools
+  ansible.builtin.dnf:
+    pkg:
+    - nmon
+    - net-tools
+    - git
+    - vim
