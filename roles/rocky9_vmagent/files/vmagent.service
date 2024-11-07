@@ -1,0 +1,11 @@
+[Unit]
+Description=VictoriaMetrics Agent
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/vmagent -promscrape.config=/etc/vmagent/config.yml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

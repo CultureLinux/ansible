@@ -1,0 +1,2 @@
+- include_tasks: pre_install.yml
+- include_tasks: install_vm_agent.yml

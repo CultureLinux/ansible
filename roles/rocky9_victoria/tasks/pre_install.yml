@@ -1,5 +1,5 @@
----
-- name: Create victoriametrics
+--- 
+- name: Create victoriametrics group
   ansible.builtin.group:
     name: victoriametrics
     state: present
