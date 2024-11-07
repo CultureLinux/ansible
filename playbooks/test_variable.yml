@@ -1,0 +1,15 @@
+---
+- name : test variables
+  hosts: rocky9
+  remote_user: root
+  become: true
+
+  tasks:
+    - name : debug var avec variable dans la task
+      debug: 
+        msg: "{{ mavar }}"  
+    - name : debug var avec variable dans la task
+      debug: 
+        msg: "{{ mavar }}"
+      vars:
+        mavar: "provenance playbook"

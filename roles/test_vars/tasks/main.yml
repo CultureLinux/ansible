@@ -1,0 +1,4 @@
+---
+- name : debug var
+  debug: 
+    msg: "{{ mavar }}"
