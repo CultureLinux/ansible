@@ -1,0 +1,8 @@
+---
+- name : test variables
+  hosts: rocky9
+  remote_user: root
+  become: true
+
+  roles:
+    - test_vars
