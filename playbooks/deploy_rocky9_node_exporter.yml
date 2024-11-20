@@ -1,0 +1,8 @@
+---
+- name : rocky9 baseline 
+  hosts: node_exporter
+  remote_user: root
+  become: true
+
+  roles:
+      - rocky9_node_exporter

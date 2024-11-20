@@ -8,9 +8,19 @@
   debug:
      msg: "{{ victoria_version.stdout_lines[0] }}"
 
-- name: get binary
+- name: get binary VictoriaMetrics
   ansible.builtin.unarchive:
     src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoria_version.stdout_lines[0] }}/victoria-metrics-linux-amd64-{{ victoria_version.stdout_lines[0] }}.tar.gz
+    dest: /usr/bin
+    mode: 755
+    owner: root
+    group: root
+    remote_src: yes
+
+
+- name: get binary VictoriaMetrucs
+  ansible.builtin.unarchive:
+    src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoria_version.stdout_lines[0] }}/vmutils-linux-amd64-{{ victoria_version.stdout_lines[0] }}.tar.gz
     dest: /usr/bin
     mode: 755
     owner: root
@@ -27,6 +37,7 @@
   loop:
     - victoriametrics.conf
     - scrape.yml
+    - alerts.yml
 
 - name: Copy victoriametrics service
   copy:
@@ -41,3 +52,27 @@
     state: restarted
     daemon_reload: true
     name: vmsingle
+
+- name: Copy alertmanager service
+  copy:
+    src: vmalert.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart service with daemon reload
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    name: vmalert        
+
+- name: Open ports
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 8428
+    - 8880    

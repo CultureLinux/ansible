@@ -1,0 +1,15 @@
+ 
+ [Unit]
+Description=VMAlert
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=victoriametrics
+Group=victoriametrics
+Type=simple
+WorkingDirectory=/etc/victoriametrics/single/
+ExecStart=vmalert-prod -datasource.url=http://localhost:8428 -rule=/etc/victoriametrics/single/alerts.yml -notifier.url=http://localhost:9093
+
+[Install]
+WantedBy=multi-user.target

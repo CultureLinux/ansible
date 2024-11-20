@@ -1,0 +1,11 @@
+---
+- name: Manually create the initial virtualenv
+  command:
+    cmd: python3 -m venv /opt/prometheus-pve-exporter
+    creates: "/opt/prometheus-pve-exporter"
+
+
+- name: Install requirements
+  command:
+    cmd: python3 -m venv /opt/prometheus-pve-exporter
+  

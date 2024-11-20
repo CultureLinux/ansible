@@ -2,3 +2,4 @@ ansible.cfg
 inventory
 .envrc
 tmp/*
+host_vars/*.yml

@@ -5,7 +5,18 @@ scrape_configs:
     scrape_interval: 10s
     static_configs:
       - targets: ['127.0.0.1:8428'] 
-  - job_name: victoriametrics
+
+  - job_name: node_exporter_local
+    scrape_interval: 10s
     static_configs:
-    - targets:
-      - http://localhost:8428/metrics
+      - targets: ['vm2:9100','builder:9100','prox-docky:9100','prox-eye:9100','prox-guard:9100','vm2:9100'] 
+
+  - job_name: proxmox_exporter_local
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['proxmox1:9221'] 
+    metrics_path: /pve
+    params:
+      module: [default]
+      cluster: ['1']
+      node: ['1']
