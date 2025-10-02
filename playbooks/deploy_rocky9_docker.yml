@@ -1,0 +1,7 @@
+---
+- name: Installer Docker sur Rocky Linux 9
+  hosts: rocky9_docker
+  remote_user: root
+  become: true
+  roles:
+    - rocky9_vault/rocky9_docker
