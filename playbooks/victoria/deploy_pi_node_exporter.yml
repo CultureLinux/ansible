@@ -1,0 +1,8 @@
+---
+- name : rocky9 baseline 
+  hosts: raspberrypi
+  remote_user: root
+  become: true
+
+  roles:
+      - pi/pi_node_exporter

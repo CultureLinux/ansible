@@ -1,0 +1,19 @@
+server {
+    listen 443 ssl;
+    server_name {{grafana_domain}};  
+
+    ssl_certificate /etc/nginx/ssl/_.local.clinux.fr.crt;
+    ssl_certificate_key /etc/nginx/ssl/_.local.clinux.fr.key; 
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384';
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        proxy_pass http://localhost:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    access_log /var/log/nginx/grafana_access.log;
+    error_log /var/log/nginx/grafana_error.log;
+}

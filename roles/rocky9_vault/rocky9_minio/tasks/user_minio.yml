@@ -1,0 +1,13 @@
+---
+- name: create user minio
+  user:
+    name: minio-user
+    password: "minio-user"
+    state: present
+    shell: /bin/bash
+
+- name: create group minio
+  group:
+    name: minio-user
+    state: present
+    

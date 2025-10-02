@@ -3,3 +3,5 @@ inventory
 .envrc
 tmp/*
 host_vars/*.yml
+roles/rocky9_vault/*/files/ssl/*
+host_vars/*

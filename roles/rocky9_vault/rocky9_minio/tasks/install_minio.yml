@@ -1,0 +1,80 @@
+---
+- name: Download minio binary
+  ansible.builtin.get_url:
+    url: https://dl.min.io/server/minio/release/linux-amd64/minio.RELEASE.2025-04-22T22-12-26Z
+    dest: /root/minio
+    mode: 0755
+    checksum: sha256:https://dl.min.io/server/minio/release/linux-amd64/minio.RELEASE.2025-04-22T22-12-26Z.sha256sum
+
+- name: move binary to /usr/local/bin
+  ansible.builtin.copy:
+    remote_src: true
+    src: /root/minio
+    dest: /usr/local/bin/minio
+    mode: '0755' 
+
+- name: "copy du wrapper systemd"
+  copy:
+    src: minio-wrapper.sh
+    dest: /usr/local/bin/minio-wrapper.sh
+    mode: 0755
+
+- name: "copy file/systemd to /etc/systemd/system"
+  copy:
+    src: systemd-minio
+    dest: /etc/systemd/system/minio.service
+    mode: 0644
+
+- name: "copy defaut_minio.conf to /etc/minio"
+  template:
+    src: default_minio.j2
+    dest: /etc/default/minio
+    mode: 0644
+  tags: minio_conf
+
+- name : "create folder .minio in home directory"
+  file:
+    path: /home/{{ minio_sys_user }}/.minio
+    state: directory
+    owner: "{{ minio_sys_user }}"
+    group: "{{ minio_sys_user }}"
+    mode: '0700' 
+
+- name : "create folder certs in home directory"
+  file:
+    path: /home/{{ minio_sys_user }}/.minio/certs
+    state: directory
+    owner: "{{ minio_sys_user }}"
+    group: "{{ minio_sys_user }}"
+    mode: '0700' 
+
+- name : "copy cert in home minio user"
+  copy:
+    src: "ssl/_.local.clinux.fr.crt"
+    dest: "/home/{{ minio_sys_user }}/.minio/certs/public.crt"
+    owner: "{{ minio_sys_user }}"
+    group: "{{ minio_sys_user }}"
+    mode: '0600'
+
+- name : "copy cert in home minio user"
+  copy:
+    src: "ssl/_.local.clinux.fr.key"
+    dest: "/home/{{ minio_sys_user }}/.minio/certs/private.key"
+    owner: "{{ minio_sys_user }}"
+    group: "{{ minio_sys_user }}"
+    mode: '0600'
+
+- name: "Open firewalld port 9000 for source 192.168.1.0/24"
+  ansible.posix.firewalld:
+    rich_rule: 'rule family="ipv4" source address="192.168.1.0/24" port protocol="tcp" port="9000" accept'
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: enable and start minio service
+  systemd:
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+    name: minio
+  tags: minio_conf

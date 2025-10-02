@@ -1,0 +1,12 @@
+- name: copy grafana.conf to /etc/nginx/sites-available directory
+  template:
+    src: grafana.conf.j2
+    dest: /etc/nginx/sites-available/grafana.conf
+    mode: '0644'
+
+- name: symlink grafana.conf to sites-enabled directory
+  file:
+    src: /etc/nginx/sites-available/grafana.conf
+    dest: /etc/nginx/sites-enabled/grafana.conf
+    state: link
+  notify: Reload Nginx

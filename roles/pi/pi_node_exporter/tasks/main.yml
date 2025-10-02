@@ -1,0 +1,43 @@
+- name: Create node_exporter user
+  user:
+    name: "{{ node_exporter_user }}"
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: no
+
+- name: Download node_exporter archive
+  get_url:
+    url: "{{ node_exporter_download_url }}"
+    dest: "/tmp/node_exporter.tar.gz"
+    mode: '0644'
+
+- name: Extract node_exporter binary
+  unarchive:
+    src: "/tmp/node_exporter.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+
+- name: Copy node_exporter binary to /usr/local/bin
+  copy:
+    remote_src: yes
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.{{ node_exporter_arch }}/node_exporter"
+    dest: "/usr/local/bin/node_exporter"
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create systemd service file
+  copy:
+    src: node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start node_exporter
+  systemd:
+    name: node_exporter
+    enabled: yes
+    state: started

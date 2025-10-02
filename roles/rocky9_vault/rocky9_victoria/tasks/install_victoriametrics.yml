@@ -1,0 +1,102 @@
+---
+- name: get last version of victoria metrics
+  ansible.builtin.shell:
+    cmd: curl -sg "https://api.github.com/repos/VictoriaMetrics/VictoriaMetrics/tags" | jq -r '.[0].name'
+  register: victoria_version
+
+- name: show version
+  debug:
+     msg: "{{ victoria_version.stdout_lines[0] }}"
+
+- name: get binary VictoriaMetrics
+  ansible.builtin.unarchive:
+    src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoria_version.stdout_lines[0] }}/victoria-metrics-linux-amd64-{{ victoria_version.stdout_lines[0] }}.tar.gz
+    dest: /usr/bin
+    mode: 755
+    owner: root
+    group: root
+    remote_src: yes
+
+
+- name: get binary VictoriaMetrucs
+  ansible.builtin.unarchive:
+    src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoria_version.stdout_lines[0] }}/vmutils-linux-amd64-{{ victoria_version.stdout_lines[0] }}.tar.gz
+    dest: /usr/bin
+    mode: 755
+    owner: root
+    group: root
+    remote_src: yes
+
+- name: Copy victoriametrics conf files
+  copy:
+    src: '{{item}}'
+    dest: /etc/victoriametrics/single/
+    owner: victoriametrics
+    group: victoriametrics
+    mode: '0644'
+  loop:
+    - victoriametrics.conf
+    - scrape.yml
+    - alerts.yml
+  tags:
+    - scrape
+
+- name: Copy victoriametrics service
+  copy:
+    src: vmsingle.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart service with daemon reload
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    enabled: yes
+    name: vmsingle
+  tags:
+    - scrape
+    
+- name: Copy alertmanager service
+  copy:
+    src: vmalert.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart service with daemon reload
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    name: vmalert        
+
+- name: Open ports
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 8428
+    - 8880    
+
+
+- name: copy victoria.nginx.j2 to /etc/nginx/sites-available directory
+  template:
+    src: victoria.nginx.j2
+    dest: /etc/nginx/sites-available/victoria.nginx.conf
+    mode: '0644'
+
+- name: symlink victoria.nginx.j2 to sites-enabled directory
+  file:
+    src: /etc/nginx/sites-available/victoria.nginx.conf
+    dest: /etc/nginx/sites-enabled/victoria.nginx.conf
+    state: link
+
+- name: start and enable nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: yes

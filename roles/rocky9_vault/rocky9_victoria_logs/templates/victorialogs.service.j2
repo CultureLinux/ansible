@@ -1,0 +1,12 @@
+[Unit]
+Description=VictoriaLogs service
+After=network.target
+
+[Service]
+User={{ victorialogs_user }}
+Group={{ victorialogs_user }}
+ExecStart={{ victorialogs_dir }}/victoria-logs-prod -storageDataPath={{ victorialogs_dir }}/data
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

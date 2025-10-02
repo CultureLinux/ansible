@@ -1,8 +1,0 @@
----
-- name : rocky9 victoriametrics
-  hosts: rocky9
-  remote_user: root
-  become: true
-
-  roles:
-      - rocky9_victoria

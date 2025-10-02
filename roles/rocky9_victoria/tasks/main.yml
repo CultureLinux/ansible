@@ -1,3 +1,0 @@
-- include_tasks: pre_install.yml
-- include_tasks: install_victoriametrics.yml
-- include_tasks: install_alertmanager.yml

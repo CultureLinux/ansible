@@ -1,0 +1,81 @@
+---
+- name: Set SELinux to permissive
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: Set SELinux to permissive by editing /etc/selinux/config
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=permissive'
+
+- name: install nginx on rocky9
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+- name: create /etc/nginx/ssl directory
+  ansible.builtin.file:
+    path: /etc/nginx/ssl
+    state: directory
+    mode: '0755'
+
+- name: create nginx/sites-available directory
+  ansible.builtin.file:
+    path: /etc/nginx/sites-available
+    state: directory
+    mode: '0755'
+
+- name: create nginx/sites-enabled directory
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+    mode: '0755'
+
+- name: create _.local.clinux.fr.crt, file in /etc/nginx/ssl directory
+  copy:
+    src: ssl/_.local.clinux.fr.crt
+    dest: /etc/nginx/ssl/_.local.clinux.fr.crt
+    mode: '0644'
+
+- name: create _.local.clinux.fr.key file in /etc/nginx/ssl directory 
+  copy:
+    src: ssl/_.local.clinux.fr.key
+    dest: /etc/nginx/ssl/_.local.clinux.fr.key
+    mode: '0644'
+
+- name: setup nginx.conf
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+
+- name: start and enable nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: yes
+
+- name: Allow https
+  ansible.posix.firewalld:
+    port: "{{item}}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+   - 80/tcp
+   - 443/tcp
+
+- name: add alias in bashrc if not present
+  lineinfile:
+    path: /root/.bashrc
+    regexp: '^alias nginxtest="nginx -t"'
+    line: 'alias nginxtest="nginx -t"'
+
+- name: add alias in bashrc if not present
+  lineinfile:
+    path: /root/.bashrc
+    regexp: '^alias nginxrestart="service nginx restart"'
+    line: 'alias nginxrestart="service nginx restart"'    
+

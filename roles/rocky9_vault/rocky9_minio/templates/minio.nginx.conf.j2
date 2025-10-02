@@ -1,0 +1,70 @@
+server {
+    listen 443 ssl;
+    server_name {{inventory_hostname}}.local.clinux.fr;  
+
+    ssl_certificate /etc/nginx/ssl/_.local.clinux.fr.crt;
+    ssl_certificate_key /etc/nginx/ssl/_.local.clinux.fr.key; 
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384';
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        proxy_pass https://localhost:9000; 
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    access_log /var/log/nginx/minio_access.log;
+    error_log /var/log/nginx/minio_error.log;
+}
+
+server {
+    listen 443 ssl;
+    server_name {{inventory_hostname}}-admin.local.clinux.fr;  
+
+    ssl_certificate /etc/nginx/ssl/_.local.clinux.fr.crt;
+    ssl_certificate_key /etc/nginx/ssl/_.local.clinux.fr.key; 
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384';
+    ssl_prefer_server_ciphers on;
+
+    access_log /var/log/nginx/minio_admin_access.log;
+    error_log /var/log/nginx/minio_admin_error.log;
+
+    # Allow special characters in headers
+    ignore_invalid_headers off;
+    # Allow any size file to be uploaded.
+    # Set to a value such as 1000m; to restrict file size to a specific value
+    client_max_body_size 0;
+    # Disable buffering
+    proxy_buffering off;
+    proxy_request_buffering off;
+
+
+    location /ws/ {
+        proxy_pass https://localhost:9001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+    }
+
+
+	location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-NginX-Proxy true;
+        real_ip_header X-Real-IP;
+        proxy_connect_timeout 300;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        chunked_transfer_encoding off;
+        proxy_pass https://localhost:9001/; 
+    }
+}

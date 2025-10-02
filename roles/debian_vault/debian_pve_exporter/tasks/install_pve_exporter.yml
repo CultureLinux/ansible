@@ -7,5 +7,26 @@
 
 - name: Install requirements
   command:
-    cmd: python3 -m venv /opt/prometheus-pve-exporter
+    cmd: /opt/prometheus-pve-exporter/bin/pip install prometheus-pve-exporter
   
+
+- name: "copy file/systemd to /etc/systemd/system"
+  copy:
+    src: prometheus-pve-exporter.service
+    dest: /etc/systemd/system/prometheus-pve-exporter.service
+    mode: 0644
+
+- name: Générer le fichier pve.yml
+  template:
+    src: pve.yml
+    dest: /etc/prometheus/pve.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0640'
+
+- name: enable and start minio service
+  systemd:
+    daemon_reload: yes
+    state: started
+    enabled: yes
+    name: prometheus-pve-exporter

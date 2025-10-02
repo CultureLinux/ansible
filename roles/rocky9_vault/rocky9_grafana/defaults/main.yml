@@ -1,0 +1,3 @@
+grafana_version: "8.2.5"
+grafana_domain: "grafana.local.clinux.fr"
+email: "dev@clinux.fr"

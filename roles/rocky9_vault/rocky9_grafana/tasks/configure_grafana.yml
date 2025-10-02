@@ -1,0 +1,7 @@
+- name: Ensure Grafana is listening on localhost
+  ansible.builtin.lineinfile:
+    path: /etc/grafana/grafana.ini
+    regexp: '^;?http_addr =.*'
+    line: 'http_addr = '
+    state: present
+  notify: Restart Grafana
