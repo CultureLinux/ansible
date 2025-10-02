@@ -1,5 +1,5 @@
 ---
-- name : post conf debian cloud tofu
+- name : post conf cloud tofu
   hosts: rocky9
   remote_user: rocky
   become: true
@@ -33,6 +33,7 @@
     service:
       name: sshd
       state: restarted
+
   - name: "Tofu : disable cloud init"
     copy:
       content: ""
@@ -41,3 +42,24 @@
       group: root
       owner: root
       mode: 0750
+
+  - name: Create swap file
+    shell: |
+      fallocate -l 2G /swap
+      chmod 600 /swap
+      mkswap /swap
+      swapon /swap
+      cp /etc/fstab /etc/fstab.bak
+      echo '/swap none swap sw 0 0' | tee -a /etc/fstab
+
+  - sysctl:
+      name: vm.swappiness
+      value: '10'
+      sysctl_set: true
+      state: present
+      reload: true
+
+  - name: Pause for 1 minutes to update server
+    pause:
+      minutes: 1
+
