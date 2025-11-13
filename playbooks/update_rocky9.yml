@@ -1,0 +1,12 @@
+---
+- name : rocky9 baseline upgrade
+  hosts: rocky9
+  remote_user: root
+  become: true
+
+  tasks:
+    - name: Upgrade all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      

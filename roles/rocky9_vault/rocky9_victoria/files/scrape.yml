@@ -17,6 +17,7 @@ scrape_configs:
         - 'raspap.local.clinux.fr:9100'
         - 'web.lab.clinux.fr:9100'
         - 'doc.clinux.fr:9100'
+        - 'prox2-docky.local.clinux.fr:9100'
 
 
   - job_name: proxmox_exporter_local_1
@@ -24,6 +25,7 @@ scrape_configs:
     static_configs:
       - targets: 
         - 'proxmox.local.clinux.fr:9221'
+        - 'proxmox2.local.clinux.fr:9221'
     metrics_path: /pve
     params:
       target: 
