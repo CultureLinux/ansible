@@ -1,0 +1,6 @@
+---
+pve_tls_crt_src: "/home/clinux/Codium/lego/.lego/certificates/_.local.clinux.fr.crt"
+pve_tls_key_src: "/home/clinux/Codium/lego/.lego/certificates/_.local.clinux.fr.key"
+pve_tls_dest_dir: "/etc/pve/local"
+pve_tls_crt_dest: "{{ pve_tls_dest_dir }}/pve-ssl.pem"
+pve_tls_key_dest: "{{ pve_tls_dest_dir }}/pve-ssl.key"

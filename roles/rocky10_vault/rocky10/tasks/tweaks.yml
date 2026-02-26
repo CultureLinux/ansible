@@ -1,0 +1,20 @@
+---
+- name: "Rocky10 : Add alias in profiles"
+  copy:
+    src: alias.sh
+    dest: /etc/profile.d/alias.sh
+    mode: 0644
+    owner: root
+
+- name: "Rocky10 : Add NMON export root"
+  lineinfile:
+      path: /root/.bashrc
+      regexp: '^export NMN'
+      line: 'export NMON=dtcmnu' 
+
+- name: Disable and mask cockpit.socket
+  ansible.builtin.systemd:
+    name: cockpit.socket
+    enabled: false
+    masked: true
+    state: stopped

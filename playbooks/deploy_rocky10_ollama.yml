@@ -1,0 +1,9 @@
+---
+- name : Ollama stack
+  hosts: toweria.local.clinux.fr
+  remote_user: root
+  become: true
+
+  roles:
+      - rocky10_vault/rocky10
+      - rocky10_vault/rocky10_ollama

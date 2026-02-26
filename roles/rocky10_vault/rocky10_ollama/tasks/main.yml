@@ -1,0 +1,2 @@
+- include_tasks: install_ollama.yml
+- include_tasks: install_agent.yml

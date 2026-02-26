@@ -1,0 +1,25 @@
+---
+- name: Install dependencies
+  ansible.builtin.yum:
+    name:
+      - curl
+      - zstd
+    state: present
+
+- name: "Download Ollama install script"
+  ansible.builtin.get_url:
+    url: "https://ollama.com/install.sh"
+    dest: "{{ ollama_install_script }}"
+    mode: '0755'
+
+- name: Run Ollama install script
+  ansible.builtin.command:
+    cmd: "sh {{ ollama_install_script }}"
+  args:
+    creates: "/usr/local/bin/ollama"
+
+- name: Ensure Ollama binary is executable
+  ansible.builtin.file:
+    path: "/usr/local/bin/ollama"
+    mode: '0755'
+    state: file

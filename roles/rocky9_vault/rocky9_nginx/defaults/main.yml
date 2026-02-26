@@ -1,0 +1,4 @@
+nginx_ssl_src_dir: "/home/clinux/Codium/lego/.lego/certificates"
+nginx_ssl_files:
+  - _.local.clinux.fr.crt
+  - _.local.clinux.fr.key

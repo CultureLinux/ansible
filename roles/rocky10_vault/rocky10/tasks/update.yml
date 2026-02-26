@@ -1,0 +1,40 @@
+---
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Install EPEL repo
+  ansible.builtin.dnf:
+    name:
+      - epel-release
+    state: latest
+
+- name: Install all standard tools
+  ansible.builtin.dnf:
+    pkg:
+    - nmon
+    - net-tools
+    - git
+    - vim
+    - chrony
+    - bash-completion
+
+- name: "Rocky10 : set Timezone Paris"
+  file:
+    src: "/usr/share/zoneinfo/Europe/Paris"
+    dest: "/etc/localtime"
+    state: link
+
+- name : "Rocky9 : copy chrony.conf"
+  copy:
+    src: chrony.conf
+    dest: /etc/chrony.conf
+    mode: 0644
+    owner: root 
+
+- name : "Restart chrony to apply"
+  service:
+    name: chronyd
+    state: restarted
+    enabled: yes

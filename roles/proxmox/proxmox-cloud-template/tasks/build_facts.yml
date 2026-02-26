@@ -25,5 +25,9 @@
 #        file: "AlmaLinux-9-GenericCloud-latest.x86_64.qcow2"
 #        vm: "alma9-daily"
 #        vmid: "1004"
-
+      - name: rocky10
+        url: "https://download.rockylinux.org/pub/rocky/10/images/x86_64/"
+        file: "Rocky-10-GenericCloud-Base.latest.x86_64.qcow2"
+        vm: "rocky10-daily"
+        vmid: "1013"
         
