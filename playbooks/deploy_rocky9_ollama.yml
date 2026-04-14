@@ -5,5 +5,5 @@
   become: true
 
   roles:
-      - rocky10_vault/rocky10
+      - rocky9_vault/rocky9
       - rocky10_vault/rocky10_ollama

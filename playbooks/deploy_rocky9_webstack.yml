@@ -8,3 +8,4 @@
       - rocky9_vault/rocky9
       - rocky9_vault/rocky9_node_exporter      
       - rocky9_vault/rocky9_nginx
+      - rocky9_vault/rocky9_mariadb
