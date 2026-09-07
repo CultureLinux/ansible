@@ -1,0 +1,14 @@
+---
+ase_agent_api_url: "https://ase.local.clinux.fr"
+ase_agent_api_token: ""
+ase_agent_host: "{{ inventory_hostname }}"
+ase_agent_source: "cron"
+
+ase_agent_install_dir: /usr/local/lib/ase
+ase_agent_config_dir: /etc/ase
+ase_agent_config_file: /etc/ase/agent.env
+ase_agent_owner: root
+ase_agent_group: root
+ase_agent_validate_certs: true
+ase_agent_verify_api: true
+

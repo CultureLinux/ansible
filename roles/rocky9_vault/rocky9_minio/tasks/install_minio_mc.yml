@@ -1,10 +1,10 @@
 ---
 - name: Download minio binary
   ansible.builtin.get_url:
-    url: https://dl.min.io/client/mc/release/linux-amd64/mc.RELEASE.2025-04-16T18-13-26Z
+    url: https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2025-04-16T18-13-26Z
     dest: /root/mc
     mode: 0755
-    checksum: sha256:https://dl.min.io/client/mc/release/linux-amd64/mc.RELEASE.2025-04-16T18-13-26Z.sha256sum
+    checksum: sha256:https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2025-04-16T18-13-26Z.sha256sum
 
 - name: move binary to /usr/local/bin
   ansible.builtin.copy:

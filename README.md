@@ -5,6 +5,7 @@
 ansible-galaxy collection install ansible.posix
 ansible-galaxy collection install community.crypto
 ansible-galaxy collection install community.mysql
+ansible-galaxy collection install community.general
 ```
 
 ### Pre-requis

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+# Managed by Ansible. ASE must never change the result of a Proxmox backup.
+set +e
+set -u
+
+PHASE="${1:-}"
+TASK_KEY={{ ase_proxmox_vzdump_task_key | quote }}
+JOB_ID={{ ase_proxmox_vzdump_job_id | quote }}
+STATE_DIR={{ ase_proxmox_vzdump_state_dir | quote }}
+RUN_FILE="${STATE_DIR}/${JOB_ID}.run"
+ENV_FILE={{ ase_proxmox_vzdump_env_file | quote }}
+
+mkdir -p "$STATE_DIR"
+chmod 700 "$STATE_DIR"
+
+if [[ ! -r "$ENV_FILE" ]]; then
+    logger -t ase-vzdump "Unreadable ASE configuration: $ENV_FILE"
+    exit 0
+fi
+
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+
+REPORTER="${TIMELINE_REPORTER:-{{ ase_proxmox_vzdump_reporter }}}"
+HOST_NAME="${TIMELINE_HOST:-$(hostname)}"
+SOURCE_NAME="${TIMELINE_SOURCE:-proxmox-vzdump}"
+
+report_event() {
+    local run_id="$1"
+    local state="$2"
+    local message="$3"
+    local exit_code="${4:-}"
+
+    "$REPORTER" \
+        "$TASK_KEY" \
+        "$run_id" \
+        "$state" \
+        "$HOST_NAME" \
+        "$SOURCE_NAME" \
+        "$message" \
+        "$exit_code" || true
+}
+
+case "$PHASE" in
+    job-start)
+        run_id="$(cat /proc/sys/kernel/random/uuid)"
+        printf '%s\n' "$run_id" > "$RUN_FILE"
+        chmod 600 "$RUN_FILE"
+        report_event "$run_id" started "Proxmox vzdump job ${JOB_ID} started."
+        ;;
+
+    job-end)
+        if [[ -r "$RUN_FILE" ]]; then
+            run_id="$(cat "$RUN_FILE")"
+            report_event "$run_id" success "Proxmox vzdump job ${JOB_ID} completed successfully." 0
+            rm -f "$RUN_FILE"
+        else
+            logger -t ase-vzdump "job-end received without an ASE run ID for ${JOB_ID}"
+        fi
+        ;;
+
+    job-abort)
+        if [[ -r "$RUN_FILE" ]]; then
+            run_id="$(cat "$RUN_FILE")"
+            report_event "$run_id" failed "Proxmox vzdump job ${JOB_ID} failed." 1
+            rm -f "$RUN_FILE"
+        else
+            logger -t ase-vzdump "job-abort received without an ASE run ID for ${JOB_ID}"
+        fi
+        ;;
+
+    job-init|backup-start|backup-end|backup-abort|log-end|pre-stop|pre-restart|post-restart)
+        # Per-guest phases are ignored: one ASE execution represents the whole job.
+        ;;
+
+    *)
+        logger -t ase-vzdump "Unknown Proxmox phase for ${JOB_ID}: ${PHASE}"
+        ;;
+esac
+
+exit 0
+

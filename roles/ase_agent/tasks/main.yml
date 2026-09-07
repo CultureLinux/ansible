@@ -1,0 +1,79 @@
+---
+- name: Validate ASE agent configuration
+  ansible.builtin.assert:
+    that:
+      - ase_agent_api_url is match('^https?://[^/]+(?:/.*)?$')
+      - ase_agent_api_token is match('^tlo_[A-Za-z0-9_-]{43}$')
+      - ase_agent_host | length > 0
+      - ase_agent_source | length > 0
+    fail_msg: >-
+      Invalid ASE configuration. The URL must start with http:// or https://,
+      and the API token must be the complete token displayed by ASE.
+  no_log: true
+
+- name: Install ASE agent dependencies
+  ansible.builtin.package:
+    name:
+      - curl
+      - jq
+    state: present
+
+- name: Create ASE installation directory
+  ansible.builtin.file:
+    path: "{{ ase_agent_install_dir }}"
+    state: directory
+    owner: "{{ ase_agent_owner }}"
+    group: "{{ ase_agent_group }}"
+    mode: "0755"
+
+- name: Create ASE configuration directory
+  ansible.builtin.file:
+    path: "{{ ase_agent_config_dir }}"
+    state: directory
+    owner: "{{ ase_agent_owner }}"
+    group: "{{ ase_agent_group }}"
+    mode: "0700"
+
+- name: Install ASE execution reporter
+  ansible.builtin.copy:
+    src: report-execution.sh
+    dest: "{{ ase_agent_install_dir }}/report-execution.sh"
+    owner: "{{ ase_agent_owner }}"
+    group: "{{ ase_agent_group }}"
+    mode: "0755"
+
+- name: Install ASE command wrapper
+  ansible.builtin.copy:
+    src: timeline-run.sh
+    dest: "{{ ase_agent_install_dir }}/timeline-run.sh"
+    owner: "{{ ase_agent_owner }}"
+    group: "{{ ase_agent_group }}"
+    mode: "0755"
+
+- name: Write ASE agent credentials
+  ansible.builtin.template:
+    src: agent.env.j2
+    dest: "{{ ase_agent_config_file }}"
+    owner: "{{ ase_agent_owner }}"
+    group: "{{ ase_agent_group }}"
+    mode: "0600"
+  no_log: true
+
+- name: Check ASE readiness endpoint from the managed host
+  ansible.builtin.uri:
+    url: "{{ ase_agent_api_url | regex_replace('/+$', '') }}/health/ready"
+    method: GET
+    return_content: true
+    status_code: 200
+    validate_certs: "{{ ase_agent_validate_certs }}"
+  register: ase_agent_readiness
+  changed_when: false
+  when: ase_agent_verify_api | bool
+
+- name: Confirm ASE agent installation
+  ansible.builtin.debug:
+    msg: >-
+      ASE agent installed on {{ ase_agent_host }}. Run commands with:
+      TIMELINE_ENV_FILE={{ ase_agent_config_file }}
+      {{ ase_agent_install_dir }}/timeline-run.sh <task-key> -- <command>
+
