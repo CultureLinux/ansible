@@ -1,0 +1,100 @@
+---
+- name: "GitLab CE : Validate target OS and variables"
+  assert:
+    that:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int == 9
+      - gitlab_ce_version | length > 0
+    fail_msg: "Ce role supporte Rocky/EL 9 et requiert gitlab_ce_version, par exemple: 19.3.2-ce.0.el9."
+
+- name: "GitLab CE : Install dependencies"
+  dnf:
+    name:
+      - ca-certificates
+      - curl
+      - python3-dnf-plugin-versionlock
+      - openssh-server
+      - perl
+      - policycoreutils-python-utils
+      - postfix
+      - tzdata
+    state: installed
+
+- name: "GitLab CE : Enable sshd"
+  service:
+    name: sshd
+    state: started
+    enabled: true
+
+- name: "GitLab CE : Enable postfix"
+  service:
+    name: postfix
+    state: started
+    enabled: true
+
+- name: "GitLab CE : Add official repository"
+  yum_repository:
+    name: gitlab_gitlab-ce
+    description: GitLab CE repository
+    baseurl: "{{ gitlab_repo_baseurl }}"
+    repo_gpgcheck: true
+    gpgcheck: true
+    enabled: true
+    gpgkey: "{{ gitlab_repo_gpgkeys | join('\n') }}"
+    sslverify: true
+  register: gitlab_repo
+
+- name: "GitLab CE : Import repository and package signing keys"
+  rpm_key:
+    key: "{{ item }}"
+    state: present
+  loop: "{{ gitlab_repo_gpgkeys }}"
+  register: gitlab_gpg_keys
+
+- name: "GitLab CE : Clean DNF metadata after repository or key change"
+  command: dnf clean metadata
+  changed_when: true
+  when: gitlab_repo.changed or gitlab_gpg_keys.changed
+
+- name: "GitLab CE : Install requested version"
+  dnf:
+    name: "gitlab-ce-{{ gitlab_ce_version }}"
+    state: present
+    update_cache: true
+  environment:
+    EXTERNAL_URL: "{{ gitlab_external_url }}"
+  notify: reconfigure gitlab
+
+- name: "GitLab CE : Lock requested version"
+  command: "dnf versionlock list gitlab-ce"
+  register: gitlab_versionlock_list
+  changed_when: false
+  failed_when: false
+  when: gitlab_versionlock_enabled | bool
+
+- name: "GitLab CE : Add version lock"
+  command: "dnf versionlock add gitlab-ce-{{ gitlab_ce_version }}"
+  when:
+    - gitlab_versionlock_enabled | bool
+    - gitlab_ce_version not in gitlab_versionlock_list.stdout
+
+- name: "GitLab CE : Configure gitlab.rb"
+  template:
+    src: gitlab.rb.j2
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: "0600"
+  notify: reconfigure gitlab
+
+- name: "GitLab CE : Open firewalld services"
+  firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: "{{ gitlab_firewalld_services }}"
+  when: gitlab_manage_firewalld | bool
+
+- name: "GitLab CE : Flush handlers"
+  meta: flush_handlers

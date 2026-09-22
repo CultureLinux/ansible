@@ -1,0 +1,19 @@
+---
+gitlab_ce_version: ""
+gitlab_external_url: "http://{{ ansible_fqdn | default(inventory_hostname) }}"
+
+gitlab_manage_firewalld: true
+gitlab_firewalld_services:
+  - http
+  - https
+  - ssh
+
+gitlab_versionlock_enabled: true
+
+gitlab_repo_baseurl: "https://packages.gitlab.com/gitlab/gitlab-ce/el/9/$basearch"
+gitlab_repo_gpgkeys:
+  - "https://packages.gitlab.com/gpgkey/gpg.key"
+  - "https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey/gitlab-gitlab-ce-CB947AD886C8E8FD.pub.gpg"
+  - "https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey/gitlab-gitlab-ce-3D645A26AB9FBD22.pub.gpg"
+
+gitlab_additional_config: ""

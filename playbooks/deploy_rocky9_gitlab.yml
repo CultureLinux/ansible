@@ -1,0 +1,9 @@
+---
+- name : rocky9 minio 
+  hosts: gitlab
+  remote_user: root
+  become: true
+
+  roles:
+      - rocky9_vault/rocky9
+      - rocky9_vault/rocky9_gitlab
