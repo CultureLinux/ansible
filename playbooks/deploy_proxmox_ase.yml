@@ -1,0 +1,40 @@
+---
+- name : proxmox ase 
+  hosts: proxmox
+  remote_user: root
+  become: true
+
+  vars_prompt:
+    - name: ase_agent_api_url
+      prompt: ASE API URL
+      default: https://ase.local.clinux.fr
+      private: false
+
+    - name: ase_agent_api_token
+      prompt: ASE API token
+      private: true
+      confirm: true
+
+    - name: ase_agent_host_prompt
+      prompt: Host name displayed in ASE (empty uses inventory name)
+      default: ""
+      private: false
+
+    - name: ase_proxmox_vzdump_job_id
+      prompt: Proxmox vzdump job ID
+      default: backup-be3d48ab-afc2
+      private: false
+
+    - name: ase_proxmox_vzdump_task_key
+      prompt: ASE task key authorized for this API client
+      default: proxmox3-backup-nightly
+      private: false
+
+  roles:
+    - role: ase_agent
+      vars:
+        ase_agent_host: "{{ ase_agent_host_prompt | default(inventory_hostname, true) }}"
+        ase_agent_source: proxmox-vzdump
+
+    - role: ase_proxmox_vzdump
+

@@ -1,0 +1,8 @@
+---
+ase_proxmox_vzdump_job_id: ""
+ase_proxmox_vzdump_task_key: ""
+ase_proxmox_vzdump_hook_dir: /usr/local/lib/ase/proxmox
+ase_proxmox_vzdump_state_dir: /run/ase/vzdump
+ase_proxmox_vzdump_env_file: /etc/ase/agent.env
+ase_proxmox_vzdump_reporter: /usr/local/lib/ase/report-execution.sh
+

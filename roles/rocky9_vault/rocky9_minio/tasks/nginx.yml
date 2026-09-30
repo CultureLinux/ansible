@@ -1,0 +1,18 @@
+---
+- name: copy minio.nginx.conf to /etc/nginx/sites-available directory
+  template:
+    src: minio.nginx.conf.j2
+    dest: /etc/nginx/sites-available/minio.nginx.conf
+    mode: '0644'
+
+- name: symlink minio.nginx.conf to sites-enabled directory
+  file:
+    src: /etc/nginx/sites-available/minio.nginx.conf
+    dest: /etc/nginx/sites-enabled/minio.nginx.conf
+    state: link
+
+- name: start and enable nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: yes

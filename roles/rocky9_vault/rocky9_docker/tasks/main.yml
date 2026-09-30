@@ -1,0 +1,60 @@
+---
+- name: Installer les dépendances requises
+  dnf:
+    name:
+      - dnf-plugins-core
+    state: present
+
+- name: Ajouter le dépôt officiel Docker
+  command: >
+    dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+
+- name: Installer Docker Engine
+  dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+
+- name: Activer et démarrer le service Docker
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Ajouter l'utilisateur actuel au groupe docker (optionnel)
+  user:
+    name: "docky"
+    groups: docker
+    append: yes
+
+- name: Vérifier que Docker fonctionne
+  command: docker version
+  register: docker_output
+  changed_when: false
+
+- name: Copie des alias dans le user docky
+  copy:
+    src: files/alias_docker.sh
+    dest: /home/docky/.alias_docker
+    mode: '0644'
+    owner: "docky"
+    group: "docky"
+
+- name: Ajout des alias dans le .bashrc
+  lineinfile:
+    path: "/home/docky/.bashrc"
+    line: "{{ item }}"
+    create: yes
+    state: present
+    insertafter: EOF
+  with_items:
+    - "source /home/docky/.alias_docker"
+    
+- debug:
+    var: docker_output.stdout_lines

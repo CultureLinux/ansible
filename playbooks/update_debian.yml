@@ -1,0 +1,17 @@
+---
+- name: debian baseline upgrade
+  hosts:
+    - proxmox
+    - raspberrypi
+  remote_user: root
+  become: true
+
+  tasks:
+    - name: Mettre à jour la liste des paquets
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Mettre à jour tous les paquets installés
+      ansible.builtin.apt:
+        state: latest
+        upgrade: dist

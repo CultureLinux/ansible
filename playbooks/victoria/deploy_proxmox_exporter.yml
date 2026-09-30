@@ -1,0 +1,8 @@
+---
+- name : proxmox prometeus exporter
+  hosts: proxmox
+  remote_user: root
+  become: true
+
+  roles:
+      - debian_vault/debian_pve_exporter

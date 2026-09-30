@@ -1,0 +1,75 @@
+---
+- name: Create victoriaLogs user
+  user:
+    name: "{{ victorialogs_user }}"
+    system: yes
+    shell: /sbin/nologin
+    create_home: no
+
+- name: Create application directory
+  file:
+    path: "{{ victorialogs_dir }}"
+    state: directory
+    owner: "{{ victorialogs_user }}"
+    group: "{{ victorialogs_user }}"
+
+- name: Download VictoriaLogs binary
+  get_url:
+    url: "{{ victorialogs_binary_url }}"
+    dest: "/tmp/victorialogs.tar.gz"
+
+- name: Extract VictoriaLogs binary
+  unarchive:
+    src: "/tmp/victorialogs.tar.gz"
+    dest: "{{ victorialogs_dir }}"
+    remote_src: yes
+    creates: "{{ victorialogs_dir }}/victoria-logs-prod"
+
+- name: Set correct permissions
+  file:
+    path: "{{ victorialogs_dir }}"
+    owner: "{{ victorialogs_user }}"
+    group: "{{ victorialogs_user }}"
+    recurse: yes
+
+- name: Copy victoriametrics service
+  template:
+    src: victorialogs.service.j2
+    dest: /etc/systemd/system/victorialogs.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Restart service with daemon reload
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    enabled: yes
+    name: victorialogs
+
+- name: Open ports
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 9428
+
+- name: copy victoria.nginx.j2 to /etc/nginx/sites-available directory
+  template:
+    src: victorialogs.nginx.j2
+    dest: /etc/nginx/sites-available/victorialogs.nginx.conf
+    mode: '0644'
+
+- name: symlink victorialogs.nginx.j2 to sites-enabled directory
+  file:
+    src: /etc/nginx/sites-available/victorialogs.nginx.conf
+    dest: /etc/nginx/sites-enabled/victorialogs.nginx.conf
+    state: link
+
+- name: start and enable nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: yes

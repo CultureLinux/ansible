@@ -1,0 +1,16 @@
+- name: Add Grafana repository
+  ansible.builtin.template:
+    src: grafana.repo.j2
+    dest: /etc/yum.repos.d/grafana.repo
+    mode: '0644'
+
+- name: Install Grafana
+  ansible.builtin.dnf:
+    name: grafana
+    state: present
+
+- name: Enable and start Grafana service
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: started
+    enabled: true

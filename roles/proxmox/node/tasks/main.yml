@@ -1,0 +1,89 @@
+---
+- name: Install nmon and net-tools
+  ansible.builtin.apt:
+    name:
+      - nmon
+      - net-tools
+    state: present
+    update_cache: yes
+    
+- name: Remove old PVE enterprise repo (.list)
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pve-enterprise.list
+    state: absent
+
+- name: Remove new PVE enterprise repo (.sources)
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pve-enterprise.sources
+    state: absent
+
+- name: Remove Ceph enterprise repo (.list)
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ceph.list
+    state: absent
+
+- name: Remove Ceph enterprise repo (.sources)
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ceph.sources
+    state: absent
+
+- name: Remove Ceph enterprise repo alt name
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ceph-enterprise.sources
+    state: absent
+
+- name: Remove legacy no-subscription .list if present
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pve-no-subscription.list
+    state: absent
+
+- name: Add Proxmox no-subscription repository (deb822)
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/pve-no-subscription.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: http://download.proxmox.com/debian/pve
+      Suites: trixie
+      Components: pve-no-subscription
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Deploy root aliases globally
+  ansible.builtin.copy:
+    src: root_aliases
+    dest: /etc/profile.d/root_aliases.sh
+    mode: '0644'
+
+- name: Patch no-subscription popup (Proxmox 9)
+  ansible.builtin.replace:
+    path: /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+    regexp: "res\\.data\\.status\\.toLowerCase\\(\\) !== 'active'"
+    replace: "false"
+    backup: yes
+  notify: restart pveproxy
+
+
+- name: Deploy TLS certificate
+  ansible.builtin.copy:
+    src: "{{ pve_tls_crt_src }}"
+    dest: "{{ pve_tls_crt_dest }}"
+    owner: root
+    group: www-data
+    mode: '0640'
+
+- name: Deploy TLS key
+  ansible.builtin.copy:
+    src: "{{ pve_tls_key_src }}"
+    dest: "{{ pve_tls_key_dest }}"
+    owner: root
+    group: www-data
+    mode: '0640'
+
+- name: Restart Proxmox services to apply new TLS
+  ansible.builtin.systemd:
+    name: pveproxy
+    state: restarted

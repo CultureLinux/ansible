@@ -1,0 +1,59 @@
+---
+- name: get last version of alertmanager
+  ansible.builtin.shell:
+    cmd: curl -sg "https://api.github.com/repos/prometheus/alertmanager/tags" | jq -r '.[0].name'
+  register: alertmanager_version
+
+- name: show version
+  debug:
+     msg: "{{ alertmanager_version.stdout_lines[0] }}"
+
+- name: get binary alertmanager
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/alertmanager/releases/download/{{ alertmanager_version.stdout_lines[0] }}/alertmanager-{{ alertmanager_version.stdout_lines[0][1:] }}.linux-amd64.tar.gz
+    dest: /tmp/
+    mode: 755
+    owner: root
+    group: root
+    remote_src: yes
+
+- name: Copy alertmanager to bin
+  copy: 
+    remote_src: True 
+    src: "/tmp/alertmanager-{{ alertmanager_version.stdout_lines[0][1:] }}.linux-amd64/{{item}}"
+    dest: /usr/local/bin/
+    mode: 0755
+  loop: 
+    - alertmanager
+    - amtool
+    
+- name: Open ports
+  ansible.posix.firewalld:
+    port: "{{ item }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 9093
+    - 9094
+- name: Copy alertmanager service
+  copy:
+    src: alertmanager.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy victoriametrics conf files
+  ansible.builtin.template:
+    src: alertmanager.yml.j2
+    dest: /etc/victoriametrics/single/alertmanager.yml
+    owner: victoriametrics
+    group: victoriametrics
+    mode: '0644'
+
+- name: Restart service with daemon reload
+  ansible.builtin.systemd_service:
+    state: restarted
+    daemon_reload: true
+    name: alertmanager    

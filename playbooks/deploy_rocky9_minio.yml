@@ -1,0 +1,10 @@
+---
+- name : rocky9 minio 
+  hosts: minio
+  remote_user: root
+  become: true
+
+  roles:
+      - rocky9_vault/rocky9
+      - rocky9_vault/rocky9_nginx
+      - rocky9_vault/rocky9_minio

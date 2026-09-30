@@ -1,11 +1,15 @@
 ---
-- name : post conf debian cloud tofu
-  hosts: rocky9
+- name : post conf cloud tofu
+  hosts:
+    - rocky9
+    - rocky10
   remote_user: rocky
   become: true
-  module_defaults:
-    ansible.builtin.setup:
-      gather_subset: min
+
+  gather_facts: true
+  gather_subset:
+    - "!all"
+    - "hardware"
 
   tasks:
   - name: wait ssh connection
@@ -25,14 +29,15 @@
   - name: "tofu : allow root sshkey"
     lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '(.*)PermitRootLogin(.*)$'
-      line: 'PermitRootLogin without-password'
+      regexp: '^#?PermitRootLogin'
+      line: 'PermitRootLogin prohibit-password'
       owner: root
 
   - name: "tofu : reload ssh"
     service:
       name: sshd
-      state: restarted
+      state: reloaded
+
   - name: "Tofu : disable cloud init"
     copy:
       content: ""
@@ -41,3 +46,39 @@
       group: root
       owner: root
       mode: 0750
+
+  - name: Create swap file
+    command: fallocate -l 2G /swap
+    args:
+      creates: /swap
+
+  - name: Set swap permissions
+    file:
+      path: /swap
+      mode: '0600'
+
+  - name: Make swap
+    command: mkswap /swap
+    when: ansible_swaptotal_mb == 0
+
+  - name: Enable swap
+    command: swapon /swap
+    when: ansible_swaptotal_mb == 0
+
+  - name: Persist swap
+    lineinfile:
+      path: /etc/fstab
+      line: '/swap none swap sw 0 0'
+      state: present
+
+  - sysctl:
+      name: vm.swappiness
+      value: '10'
+      sysctl_set: true
+      state: present
+      reload: true
+
+  - name: Pause for 1 minutes to update server
+    pause:
+      minutes: 1
+

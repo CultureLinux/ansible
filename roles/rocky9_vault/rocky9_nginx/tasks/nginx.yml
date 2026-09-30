@@ -1,0 +1,61 @@
+---
+- name: Allow Nginx to make network connections
+  ansible.builtin.command: setsebool -P httpd_can_network_connect 1
+
+- name: Allow Nginx to read user home directories
+  ansible.builtin.command: setsebool -P httpd_read_user_content 1
+
+- name: install nginx on rocky9
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+- name: Create nginx directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /etc/nginx/ssl
+    - /etc/nginx/sites-available
+    - /etc/nginx/sites-enabled
+
+- name: Copy SSL certificates from external directory
+  ansible.builtin.copy:
+    src: "{{ nginx_ssl_src_dir }}/{{ item }}"
+    dest: "/etc/nginx/ssl/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ nginx_ssl_files }}"
+
+- name: setup nginx.conf
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+
+- name: start and enable nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: yes
+
+- name: Allow https
+  ansible.posix.firewalld:
+    port: "{{item}}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+   - 80/tcp
+   - 443/tcp
+
+- name: Add nginx aliases to bashrc
+  lineinfile:
+    path: /root/.bashrc
+    regexp: '^alias {{ item.name }}='
+    line: 'alias {{ item.name }}="{{ item.cmd }}"'
+  loop:
+    - { name: 'nginxtest', cmd: 'nginx -t' }
+    - { name: 'nginxrestart', cmd: 'service nginx restart' }

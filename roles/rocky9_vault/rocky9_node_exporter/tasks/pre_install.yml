@@ -1,0 +1,7 @@
+---
+- name: Install all standard tools
+  ansible.builtin.dnf:
+    pkg:
+    - jq
+    - tar
+    - unzip

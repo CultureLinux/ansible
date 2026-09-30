@@ -1,0 +1,22 @@
+server {
+    listen 443 ssl;
+    server_name {{ victoria_log_hostname }};  
+
+    ssl_certificate /etc/nginx/ssl/_.local.clinux.fr.crt;
+    ssl_certificate_key /etc/nginx/ssl/_.local.clinux.fr.key; 
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384';
+    ssl_prefer_server_ciphers on;
+
+    location / {
+        proxy_pass http://localhost:9428; 
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    access_log /var/log/nginx/{{ victoria_log_hostname }}.access.log;
+    error_log /var/log/nginx/{{ victoria_log_hostname }}.error.log;
+}

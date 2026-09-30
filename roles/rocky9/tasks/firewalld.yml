@@ -1,6 +1,0 @@
----
-- name: Allow ssh
-  ansible.posix.firewalld:
-    port: 22/tcp
-    permanent: true
-    state: enabled

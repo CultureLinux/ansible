@@ -1,0 +1,3 @@
+mariadb_version: "{{ lookup('env', 'MARIADB_VERSION') }}"
+mariadb_root_password: "{{ lookup('env', 'MARIADB_ROOT_PASS') }}"
+mariadb_bind_address: "{{ lookup('env', 'MARIADB_BIND_ADDRESS') }}"

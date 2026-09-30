@@ -1,0 +1,47 @@
+---
+- name: Create vmagent
+  ansible.builtin.group:
+    name: vmagent
+    state: present
+
+- name: Create user vmagent
+  ansible.builtin.user:
+    name: vmagent
+    groups: vmagent
+    shell: /bin/false
+    createhome: no 
+    state: present
+
+- name: get last version of victoria metrics
+  ansible.builtin.shell:
+    cmd: curl -sg "https://api.github.com/repos/VictoriaMetrics/VictoriaMetrics/tags" | jq -r '.[0].name'
+  register: victoria_version
+
+- name: show version
+  debug:
+     msg: "{{ victoria_version.stdout_lines[0] }}"
+
+- name: get binary vmagent
+  ansible.builtin.unarchive:
+    src: https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victoria_version.stdout_lines[0] }}/vmutils-linux-amd64-{{ victoria_version.stdout_lines[0] }}.tar.gz
+    dest: /usr/bin/vmagent
+    mode: 750
+    owner: vmagent
+    group: vmagent
+    remote_src: yes
+
+- name: Change permissions on /etc/vmagent
+  file:
+    path: /etc/vmagent
+    owner: vmagent
+    group: vmagent
+    mode: "0770"
+    type: directory
+
+- name: Copy victoriametrics service
+  copy:
+    src: vmagent.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: '0644'

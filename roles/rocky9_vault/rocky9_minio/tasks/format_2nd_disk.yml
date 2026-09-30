@@ -1,0 +1,64 @@
+---
+- name: install parted
+  package:
+    name: parted
+    state: present 
+    
+- name: "Read device information /dev/sda"
+  parted: 
+    device: "/dev/vdb"
+    unit: MiB
+  register: device_info
+
+- name: "debug variable device_info"
+  debug:
+    msg: "{{ device_info }}"
+
+- name: "Create new partition if it does not exist"
+  parted:
+    device: "/dev/vdb"
+    number: 1
+    part_type: primary
+    state: present
+    part_start: "1MiB"
+    part_end: "100%"
+  when: device_info.partitions is not defined or device_info.partitions | length == 0
+
+- name: "Create a filesystem on the partition /dev/vdb1 in XFS"
+  filesystem:
+    fstype: xfs
+    dev: "/dev/vdb1"
+  when: device_info.partitions is defined and device_info.partitions | length == 1
+
+- name: format /dev/vdb1
+  command: mkfs.xfs -f /dev/vdb1
+
+- name: "Create folder in mnt/minio_data"
+  file:
+    path: "/mnt/minio_data"
+    state: directory
+    owner: minio-user
+    group: minio-user
+    mode: 0775
+
+- name: "Mount the new filesystem to /mnt/minio"
+  mount:
+    path: "/mnt/minio_data"
+    src: "/dev/vdb1"
+    fstype: xfs
+    state: mounted
+    opts: discard
+
+- name: "Ensure correct ownership after mounting"
+  file:
+    path: "/mnt/minio_data"
+    owner: minio-user
+    group: minio-user
+    mode: 0775
+
+- name: persist mount in fstab
+  lineinfile:
+    path: /etc/fstab
+    line: '/dev/vdb1   /mnt/minio_data   xfs defaults,discard 0 2'
+    create: yes
+    state: present

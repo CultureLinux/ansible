@@ -1,8 +1,11 @@
 ---
 - name : rocky9 baseline 
-  hosts: rocky9
+  hosts: 
+    - rocky9
+    - minio
   remote_user: root
   become: true
 
   roles:
-      - rocky9
+      - rocky9_vault/rocky9
+      - rocky9_vault/rocky9_node_exporter      

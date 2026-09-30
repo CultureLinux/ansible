@@ -1,0 +1,24 @@
+---
+- name : general setup
+  hosts: proxmox
+  remote_user: root
+  become: true
+
+  vars_prompt:
+    - name: "user"
+      prompt: "Nom de l'utilisateur"
+      private: no
+      default: "prometheus@pve"
+
+    - name: "token_name"
+      prompt: "Nom du token"
+      private: no
+      default: "default-token"
+
+    - name: "token_value"
+      prompt: "Valeur du token"
+      private: no
+      default: "changeme123"
+
+  roles:
+      - debian_vault/debian_pve_exporter

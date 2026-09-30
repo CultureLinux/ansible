@@ -1,0 +1,8 @@
+---
+- name : rocky10 baseline 
+  hosts: rocky10
+  remote_user: root
+  become: true
+
+  roles:
+      - rocky10_vault/rocky10

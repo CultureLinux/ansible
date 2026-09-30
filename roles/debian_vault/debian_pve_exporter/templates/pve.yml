@@ -1,0 +1,5 @@
+default:
+    user: {{user}}
+    token_name: {{token_name}}
+    token_value: {{token_value}}
+    verify_ssl: false

@@ -1,0 +1,8 @@
+---
+- name : proxmox baseline 
+  hosts: proxmox
+  remote_user: root
+  become: true
+
+  roles:
+      - proxmox/node

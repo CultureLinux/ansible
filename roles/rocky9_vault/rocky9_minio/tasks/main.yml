@@ -1,0 +1,9 @@
+- import_tasks: user_minio.yml
+- import_tasks: format_2nd_disk.yml
+- import_tasks: install_minio.yml
+  vars:
+   minio_password: "minio_password"
+   minio_user: "admin"
+   minio_sys_user: "minio-user"
+- import_tasks: install_minio_mc.yml   
+- import_tasks: nginx.yml

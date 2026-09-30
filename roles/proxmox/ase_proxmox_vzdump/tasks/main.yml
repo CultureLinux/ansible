@@ -1,0 +1,65 @@
+---
+- name: Validate ASE Proxmox vzdump configuration
+  ansible.builtin.assert:
+    that:
+      - ase_proxmox_vzdump_job_id is match('^[A-Za-z0-9][A-Za-z0-9_-]+$')
+      - ase_proxmox_vzdump_task_key is match('^[a-z0-9][a-z0-9-]*$')
+      - ase_proxmox_vzdump_hook_dir.startswith('/')
+      - ase_proxmox_vzdump_state_dir.startswith('/')
+    fail_msg: >-
+      Set a valid Proxmox backup job ID and the lowercase ASE task key.
+
+- name: Check that this host is a Proxmox VE node
+  ansible.builtin.command:
+    argv:
+      - pveversion
+  register: ase_proxmox_vzdump_pveversion
+  changed_when: false
+
+- name: Read the Proxmox backup job
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - get
+      - "/cluster/backup/{{ ase_proxmox_vzdump_job_id }}"
+      - --output-format
+      - json
+  register: ase_proxmox_vzdump_job
+  changed_when: false
+
+- name: Create the ASE Proxmox hook directory
+  ansible.builtin.file:
+    path: "{{ ase_proxmox_vzdump_hook_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the ASE Proxmox vzdump hook
+  ansible.builtin.template:
+    src: vzdump-hook.sh.j2
+    dest: "{{ ase_proxmox_vzdump_hook_dir }}/{{ ase_proxmox_vzdump_job_id }}.sh"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Attach the ASE hook to the Proxmox backup job
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - set
+      - "/cluster/backup/{{ ase_proxmox_vzdump_job_id }}"
+      - --script
+      - "{{ ase_proxmox_vzdump_hook_dir }}/{{ ase_proxmox_vzdump_job_id }}.sh"
+  when: >-
+    (ase_proxmox_vzdump_job.stdout | from_json).script | default('')
+    != ase_proxmox_vzdump_hook_dir ~ '/' ~ ase_proxmox_vzdump_job_id ~ '.sh'
+  register: ase_proxmox_vzdump_attach
+
+- name: Confirm the monitored Proxmox backup job
+  ansible.builtin.debug:
+    msg: >-
+      Proxmox job {{ ase_proxmox_vzdump_job_id }} is reported to ASE task
+      {{ ase_proxmox_vzdump_task_key }} by
+      {{ ase_proxmox_vzdump_hook_dir }}/{{ ase_proxmox_vzdump_job_id }}.sh.
+

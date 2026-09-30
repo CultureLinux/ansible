@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+# Managed by Ansible. ASE must never change the result of a Proxmox backup.
+set +e
+set -u
+
+PHASE="${1:-}"
+TASK_KEY={{ ase_proxmox_vzdump_task_key | quote }}
+JOB_ID={{ ase_proxmox_vzdump_job_id | quote }}
+STATE_DIR={{ ase_proxmox_vzdump_state_dir | quote }}
+RUN_FILE="${STATE_DIR}/${JOB_ID}.run"
+LOG_FILE="${STATE_DIR}/${JOB_ID}.log"
+ENV_FILE={{ ase_proxmox_vzdump_env_file | quote }}
+
+mkdir -p "$STATE_DIR"
+chmod 700 "$STATE_DIR"
+
+if [[ ! -r "$ENV_FILE" ]]; then
+    logger -t ase-vzdump "Unreadable ASE configuration: $ENV_FILE"
+    exit 0
+fi
+
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+
+REPORTER="${TIMELINE_REPORTER:-{{ ase_proxmox_vzdump_reporter }}}"
+LOG_UPLOADER="${TIMELINE_LOG_UPLOADER:-/usr/local/lib/ase/upload-execution-log.sh}"
+HOST_NAME="${TIMELINE_HOST:-$(hostname)}"
+SOURCE_NAME="${TIMELINE_SOURCE:-proxmox-vzdump}"
+
+report_event() {
+    local run_id="$1"
+    local state="$2"
+    local message="$3"
+    local exit_code="${4:-}"
+
+    "$REPORTER" \
+        "$TASK_KEY" \
+        "$run_id" \
+        "$state" \
+        "$HOST_NAME" \
+        "$SOURCE_NAME" \
+        "$message" \
+        "$exit_code" || true
+}
+
+case "$PHASE" in
+    job-start)
+        run_id="$(cat /proc/sys/kernel/random/uuid)"
+        printf '%s\n' "$run_id" > "$RUN_FILE"
+        chmod 600 "$RUN_FILE"
+        : > "$LOG_FILE"
+        chmod 600 "$LOG_FILE"
+        report_event "$run_id" started "Proxmox vzdump job ${JOB_ID} started."
+        ;;
+
+    job-end)
+        if [[ -r "$RUN_FILE" ]]; then
+            run_id="$(cat "$RUN_FILE")"
+            report_event "$run_id" success "Proxmox vzdump job ${JOB_ID} completed successfully." 0
+            if [[ -s "$LOG_FILE" && -x "$LOG_UPLOADER" ]]; then
+                gzip -c "$LOG_FILE" > "${LOG_FILE}.gz" && "$LOG_UPLOADER" "$run_id" "${LOG_FILE}.gz" || true
+            fi
+            rm -f "$RUN_FILE" "$LOG_FILE" "${LOG_FILE}.gz"
+        else
+            logger -t ase-vzdump "job-end received without an ASE run ID for ${JOB_ID}"
+        fi
+        ;;
+
+    job-abort)
+        if [[ -r "$RUN_FILE" ]]; then
+            run_id="$(cat "$RUN_FILE")"
+            report_event "$run_id" failed "Proxmox vzdump job ${JOB_ID} failed." 1
+            if [[ -s "$LOG_FILE" && -x "$LOG_UPLOADER" ]]; then
+                gzip -c "$LOG_FILE" > "${LOG_FILE}.gz" && "$LOG_UPLOADER" "$run_id" "${LOG_FILE}.gz" || true
+            fi
+            rm -f "$RUN_FILE" "$LOG_FILE" "${LOG_FILE}.gz"
+        else
+            logger -t ase-vzdump "job-abort received without an ASE run ID for ${JOB_ID}"
+        fi
+        ;;
+
+    log-end)
+        logfile="${LOGFILE:-}"
+        if [[ -n "$logfile" && -r "$logfile" ]]; then
+            printf '\n===== VM %s =====\n' "${3:-unknown}" >> "$LOG_FILE"
+            cat "$logfile" >> "$LOG_FILE"
+        fi
+        ;;
+
+    job-init|backup-start|backup-end|backup-abort|pre-stop|pre-restart|post-restart)
+        # Per-guest phases are ignored: one ASE execution represents the whole job.
+        ;;
+
+    *)
+        logger -t ase-vzdump "Unknown Proxmox phase for ${JOB_ID}: ${PHASE}"
+        ;;
+esac
+
+exit 0

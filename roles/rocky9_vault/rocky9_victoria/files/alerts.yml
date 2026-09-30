@@ -1,0 +1,39 @@
+groups:
+- name: node_exporter_alerts
+  rules:
+  - alert: Node down
+    expr: up{job="node_exporter_local"} == 0
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      title: Node {{ $labels.instance }} is down
+      description: Failed to scrape {{ $labels.job }} on {{ $labels.instance }} for more than 2 minutes. Node seems down.
+
+
+  - alert: HostOutOfMemory
+    expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: Host out of memory (instance {{ $labels.instance }})
+      description: Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}
+
+  - alert: HostHighCpuLoad
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Host high CPU load (instance {{ $labels.instance }})
+      description: CPU load is > 80%\n  VALUE = {{ $value }}
+
+  - alert: HostSwapIsFillingUp
+    expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: Host swap is filling up (instance {{ $labels.instance }})
+      description: Swap is filling up (>80%)\n  VALUE = {{ $value }}

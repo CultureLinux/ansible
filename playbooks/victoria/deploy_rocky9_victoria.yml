@@ -1,0 +1,20 @@
+---
+- name : rocky9 victoriametrics
+  hosts: victoria
+  remote_user: root
+  become: true
+
+  vars:
+    victorialogs_version: "v1.22.1"
+    victorialogs_user: "victorialogs"
+    victorialogs_dir: "/opt/victorialogs"
+    victorialogs_binary_url: "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/{{ victorialogs_version }}-victorialogs/victoria-logs-linux-amd64-{{ victorialogs_version }}-victorialogs.tar.gz"
+    service_name: "victorialogs"
+    victoria_log_hostname: "victorialogs.local.clinux.fr"
+
+  roles:
+    - rocky9_vault/rocky9
+    - rocky9_vault/rocky9_nginx
+    - rocky9_vault/rocky9_victoria
+    - rocky9_vault/rocky9_victoria_logs
+    - rocky9_vault/rocky9_grafana

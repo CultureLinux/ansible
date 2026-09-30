@@ -1,0 +1,14 @@
+[Unit]
+Description=Alertmanager
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=victoriametrics
+Group=victoriametrics
+Type=simple
+WorkingDirectory=/etc/victoriametrics/single/
+ExecStart=/usr/local/bin/alertmanager --config.file=/etc/victoriametrics/single/alertmanager.yml --web.external-url http://0.0.0.0:9093
+
+[Install]
+WantedBy=multi-user.target

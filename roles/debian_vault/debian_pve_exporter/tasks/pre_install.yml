@@ -1,0 +1,35 @@
+---
+- name: Install all standard tools
+  ansible.builtin.apt:
+    pkg:
+    - python3-pip
+    - python3-venv
+
+- name: Create prometheus group
+  ansible.builtin.group:
+    name: prometheus
+    state: present
+
+- name: Create user prometheus
+  ansible.builtin.user:
+    name: prometheus
+    groups: prometheus
+    shell: /bin/false
+    home: /opt/prometheus-pve-exporter
+    createhome: yes 
+    state: present
+
+- name: Change permissions on /opt/prometheus-pve-exporter
+  file:
+    path: /opt/prometheus-pve-exporter
+    owner: prometheus
+    group: prometheus
+    mode: "0770"
+
+- name: Create prometheus etc directory
+  ansible.builtin.file:
+    path: /etc/prometheus/
+    state: directory
+    owner: root
+    group: prometheus
+    mode: '0755'

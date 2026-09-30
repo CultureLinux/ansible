@@ -1,0 +1,47 @@
+[Unit]
+Description=MinIO
+Documentation=https://min.io/docs/minio/linux/index.html
+Wants=network-online.target
+After=network-online.target
+AssertFileIsExecutable=/usr/local/bin/minio
+
+[Service]
+WorkingDirectory=/usr/local
+
+User=minio-user
+Group=minio-user
+ProtectProc=invisible
+
+EnvironmentFile=-/etc/default/minio
+
+# Vérifie si la variable MINIO_VOLUMES est définie avant de démarrer
+ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
+
+# Réinitialisation de ExecStart pour enlever la directive héritée
+ExecStart=
+
+# Exécuter le script wrapper avec l'expansion correcte des variables
+ExecStart=/usr/local/bin/minio-wrapper.sh
+
+# MinIO RELEASE.2023-05-04T21-44-30Z ajoute la prise en charge de Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
+# Cette option peut améliorer les configurations systemctl où d'autres services utilisent `After=minio.server`
+# Décommente la ligne pour activer cette fonctionnalité
+# Type=notify
+
+# Permet à systemd de redémarrer ce service en cas de problème
+Restart=always
+
+# Spécifie le nombre maximal de descripteurs de fichiers pouvant être ouverts par ce processus
+LimitNOFILE=65536
+
+# Spécifie le nombre maximal de threads que ce processus peut créer
+TasksMax=infinity
+
+# Désactive la logique de délai d'attente et attend que le processus soit arrêté
+TimeoutStopSec=infinity
+SendSIGKILL=no
+
+[Install]
+WantedBy=multi-user.target
+
+# Construit pour ${project.name}-${project.version} (${project.name})
